@@ -73,14 +73,18 @@ EXTRN ReadyToChat: FAR
 
 ;Logo Design + Input Message Coordinate
 ;======================================
-SysLogoX			EQU		10
+SysLogoX			EQU		12
 SysLogoY			EQU		5
-SysLogoWidth		EQU		50
-SysLogoHeight		EQU		5
+SysLogoWidth		EQU		57
+SysLogoHeight		EQU		7
 SysLogoColor		EQU		1EH
 MsgStartAtMarginX	EQU		SysLogoX
 MsgStartAtMarginY	EQU		SysLogoY+SysLogoHeight+1
 ;===============================================================================
+
+;System Title Design
+;====================
+SysTitleChar	DB		4H
 
 ;Notice Bar for invitation
 ;=========================
@@ -278,11 +282,348 @@ DrawSysLogo PROC
 	;Color a portion of the screen fr the game logo
 	DrawLine SysLogoX, SysLogoY, SysLogoHeight, SysLogoWidth, ' ',SysLogoColor, CurrentPage
 
-	;Set the system title to the center of the logo
-	SetCursorPos SysLogoX+(SysLogoWidth-SysTitleSize)/2, SysLogoY+SysLogoHeight/2, CurrentPage
+	;Draw for System Title
+	;C logo 'upper-'
+	SetCursorPos SysLogoX+1, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+2, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+3, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+4, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+5, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+6, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+7, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
 
-	;Display System Title
-	DisplayStr SysTitle
+	;C logo 'Side |'
+	SetCursorPos SysLogoX+1, SysLogoY+1, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+1, SysLogoY+2, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+1, SysLogoY+3, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+1, SysLogoY+4, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+1, SysLogoY+5, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+1, SysLogoY+6, CurrentPage
+	DisplayChar	SysTitleChar
+
+
+	;C logo 'lower_'
+	SetCursorPos SysLogoX+2, SysLogoY+6, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+3, SysLogoY+6, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+4, SysLogoY+6, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+5, SysLogoY+6, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+6, SysLogoY+6, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+7, SysLogoY+6, CurrentPage
+	DisplayChar	SysTitleChar
+
+	;H logo 'left|'
+	SetCursorPos SysLogoX+9, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+9, SysLogoY+1, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+9, SysLogoY+2, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+9, SysLogoY+3, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+9, SysLogoY+4, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+9, SysLogoY+5, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+9, SysLogoY+6, CurrentPage
+	DisplayChar	SysTitleChar
+
+	;H logo 'center-'
+	SetCursorPos SysLogoX+10, SysLogoY+3, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+11, SysLogoY+3, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+12, SysLogoY+3, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+13, SysLogoY+3, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+14, SysLogoY+3, CurrentPage
+	DisplayChar	SysTitleChar
+
+
+	;H logo 'Right|'
+	SetCursorPos SysLogoX+15, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+15, SysLogoY+1, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+15, SysLogoY+2, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+15, SysLogoY+3, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+15, SysLogoY+4, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+15, SysLogoY+5, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+15, SysLogoY+6, CurrentPage
+	DisplayChar	SysTitleChar
+
+	;A logo 'Left|'
+	SetCursorPos SysLogoX+17, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+17, SysLogoY+1, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+17, SysLogoY+2, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+17, SysLogoY+3, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+17, SysLogoY+4, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+17, SysLogoY+5, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+17, SysLogoY+6, CurrentPage
+	DisplayChar	SysTitleChar
+
+	;A logo 'Upper-'
+	SetCursorPos SysLogoX+18, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+19, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+20, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+21, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+22, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+
+	;A logo 'center-'
+	SetCursorPos SysLogoX+18, SysLogoY+3, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+19, SysLogoY+3, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+20, SysLogoY+3, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+21, SysLogoY+3, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+22, SysLogoY+3, CurrentPage
+	DisplayChar	SysTitleChar
+
+	;A logo 'right|'
+	SetCursorPos SysLogoX+23, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+23, SysLogoY+1, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+23, SysLogoY+2, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+23, SysLogoY+3, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+23, SysLogoY+4, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+23, SysLogoY+5, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+23, SysLogoY+6, CurrentPage
+	DisplayChar	SysTitleChar
+
+	;T logo 'upper-'
+	SetCursorPos SysLogoX+25, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+26, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+27, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+28, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+29, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+30, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+31, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+
+	;T logo '|'
+	SetCursorPos SysLogoX+28, SysLogoY+1, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+28, SysLogoY+2, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+28, SysLogoY+3, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+28, SysLogoY+4, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+28, SysLogoY+5, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+28, SysLogoY+6, CurrentPage
+	DisplayChar	SysTitleChar
+
+	;B logo 'left|'
+	SetCursorPos SysLogoX+33, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+33, SysLogoY+1, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+33, SysLogoY+2, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+33, SysLogoY+3, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+33, SysLogoY+4, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+33, SysLogoY+5, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+33, SysLogoY+6, CurrentPage
+	DisplayChar	SysTitleChar
+
+	;B logo 'Upper-'
+	SetCursorPos SysLogoX+33, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+34, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+35, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+36, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+37, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+38, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+39, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+
+	;B logo 'Upper right |'
+	SetCursorPos SysLogoX+39, SysLogoY+1, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+39, SysLogoY+2, CurrentPage
+	DisplayChar	SysTitleChar
+	
+	;B logo 'Center -'
+	SetCursorPos SysLogoX+34, SysLogoY+3, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+35, SysLogoY+3, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+36, SysLogoY+3, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+37, SysLogoY+3, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+38, SysLogoY+3, CurrentPage
+	DisplayChar	SysTitleChar
+
+	;B logo 'lower right |'
+	SetCursorPos SysLogoX+39, SysLogoY+4, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+39, SysLogoY+5, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+39, SysLogoY+6, CurrentPage
+	DisplayChar	SysTitleChar
+
+	;B logo 'Lower -'
+	SetCursorPos SysLogoX+34, SysLogoY+6, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+35, SysLogoY+6, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+36, SysLogoY+6, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+37, SysLogoY+6, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+38, SysLogoY+6, CurrentPage
+	DisplayChar	SysTitleChar
+
+	;O logo 'left|'
+	SetCursorPos SysLogoX+41, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+41, SysLogoY+1, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+41, SysLogoY+2, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+41, SysLogoY+3, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+41, SysLogoY+4, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+41, SysLogoY+5, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+41, SysLogoY+6, CurrentPage
+	DisplayChar	SysTitleChar
+
+	;o logo 'Upper -'
+	SetCursorPos SysLogoX+42, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+43, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+44, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+45, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+46, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+47, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+
+	;O logo 'right |'
+	SetCursorPos SysLogoX+47, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+47, SysLogoY+1, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+47, SysLogoY+2, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+47, SysLogoY+3, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+47, SysLogoY+4, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+47, SysLogoY+5, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+47, SysLogoY+6, CurrentPage
+	DisplayChar	SysTitleChar
+
+	;o logo 'lower -'
+	SetCursorPos SysLogoX+42, SysLogoY+6, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+43, SysLogoY+6, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+44, SysLogoY+6, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+45, SysLogoY+6, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+46, SysLogoY+6, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+47, SysLogoY+6, CurrentPage
+	DisplayChar	SysTitleChar
+
+
+	;X logo 'left|'
+	SetCursorPos SysLogoX+49, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+50, SysLogoY+1, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+51, SysLogoY+2, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+52, SysLogoY+3, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+53, SysLogoY+4, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+54, SysLogoY+5, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+55, SysLogoY+6, CurrentPage
+	DisplayChar	SysTitleChar
+
+	;X logo 'right |'
+	SetCursorPos SysLogoX+55, SysLogoY, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+54, SysLogoY+1, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+53, SysLogoY+2, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+52, SysLogoY+3, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+51, SysLogoY+4, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+50, SysLogoY+5, CurrentPage
+	DisplayChar	SysTitleChar
+	SetCursorPos SysLogoX+49, SysLogoY+6, CurrentPage
+	DisplayChar	SysTitleChar
+
+
+	
 	RET
 DrawSysLogo ENDP
 ;======================================================================================================
