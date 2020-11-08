@@ -1,4 +1,4 @@
-BACS 1024 - Hardware to Hardware Communication (Main)
+;BACS 1024 - Hardware to Hardware Communication (Main)
 ;procedure to carry out for input process
 InputProcessing MACRO Char, User
 	LOCAL Chat_Checking, Chatting_Start, Quit_Checking, Quit, Reset, Return
