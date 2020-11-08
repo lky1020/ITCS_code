@@ -99,8 +99,6 @@ SysInvBarChar              DB      '-'
 
 ;System Message and String
 ;=========================
-SysTitle				DB		'ChatBox$'
-SysTitleSize			EQU		($-SysTitle)
 SysEntry				DB		'Please Enter Your Username => $'
 SysEntryMsg				DB		'**Max Length 15 Characters and Start with a Letter** $'
 SysContinueMsg			DB		'Press any key to continue...$'
