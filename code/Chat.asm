@@ -1,12 +1,8 @@
-;Author:Quantum Team
-;Date:08-12-2016
-;Chat module
-;----------------------------------------------
+;BACS1024 - Assignment Hardware to Hardware Com (Chat Module)
+;============================================================================================
+;                                   Start of Chat Module
+;============================================================================================
 
-;
-;Macros
-;
-;Draws chat area
 DrawChatArea MACRO Y, Username
     ;Draw separator line
     DrawLine 0, Y, 1, ChatAreaWidth, ChatLineChar, ChatLineColor, CurrentPage

@@ -62,7 +62,7 @@ PUBLIC UserNameSize2, UserName2
 ;External variables
 EXTRN ReadyToChat: FAR
 ;======================================================================================
-								;Start of Chat Module
+								;Start of Main Module
 ;======================================================================================
 
 .MODEL SMALL
