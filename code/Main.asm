@@ -5,61 +5,62 @@ InputProcessing MACRO Char, User
 
 	;Check F1 input
 	Chat_Checking:
-	CMP Char, F1_ScanCode
-	JNE Quit_Checking
-
-	MOV AL, ChatInvitation
-	OR AL, User
-	CMP AL, 3					;Only equals 3 when other user accept the invitation
-	JE	Chatting_Start
-
-	MOV ChatInvitation, User
-	CALL SelectionScreen
-	RET
-
-	Chatting_Start:
-	CALL ReadyToChat
-	MOV ChatInvitation, 0
-	CALL SelectionScreen
+    	CMP Char, F1_ScanCode       ;check whether F1 pressed
+    	JNE Quit_Checking
+    
+    	MOV AL, ChatInvitation
+    	OR AL, User                 ;0001(1) OR 0010(2) = 0011(3)
+    	CMP AL, 3					;Only equals 3 when other user accept the invitation
+    	JE	Chatting_Start
+    
+    	MOV ChatInvitation, User    ;mov 1 to ChatInvitation and wait for another COM
+    	CALL SelectionScreen        ;Refresh the main menu, to show message in notibar for the chat
+    	RET
+    
+    	Chatting_Start:
+        	CALL ReadyToChat
+        	MOV ChatInvitation, 0   ;reset chat invitation
+        	CALL SelectionScreen    
 	RET
 	;========================
 
 	;Check ESC input
 	Quit_Checking:
-	CMP Char, ESC_ScanCode
-	JNE Return					;Go to end of this macro
+    	CMP Char, ESC_ScanCode
+    	JNE Return					;Go to end of this macro
+    
+    	MOV AL,User
+    	CMP AL,1
+    	JNE Reset
 
-	MOV AL,User
-	CMP AL,1
-	JNE Reset
-
-	Quit:						;Back to the system
-	MOV AX, 4C00H
-	INT 21H
-	RET
+	Quit:						    ;Back to the system
+    	MOV AX, 4C00H
+    	INT 21H
+    	RET
 
 	Reset:
-	MOV ChatInvitation, 0
-	MOV MainReceivedChar, 0
-	CALL WaitOtherUser
-	CALL SelectionScreen
+    	MOV ChatInvitation, 0
+    	MOV MainReceivedChar, 0
+    	CALL WaitOtherUser
+    	CALL SelectionScreen
 	;==================================
 
 	Return:
+	
 ENDM InputProcessing
 
 
 ;Includes
-INCLUDE code\Consts.asm             ;testing
+INCLUDE code\Consts.asm             
 INCLUDE code\Graphics.asm
 INCLUDE code\Keyboard.asm
 INCLUDE code\Port.asm
 
-;Public variables
+;Public variables (allow access for chat)
 PUBLIC UserNameSize1, UserName1
 PUBLIC UserNameSize2, UserName2
 
-;External variables
+;External variables (access the PUBLIC of chat) - Name: type
 EXTRN ReadyToChat: FAR
 ;======================================================================================
 								;Start of Main Module
@@ -140,22 +141,25 @@ MAIN PROC FAR
 
 	Loop_In_Main:
 
-	;Get Prim User input and send to Second User
-
-	Send_In_Main:
-	GetKeyPressAndFlush
-	JZ Receive_In_Main
-	MOV MainSentChar, AH
-	SendCharTo MainSentChar
-	CALL PrimaryUserInput
-
-	Receive_In_Main:
-	ReceiveCharFrom
-	JZ Loop_In_Main
-	MOV MainReceivedChar, AL
-	CALL SecondaryUserInput
+    	;Get Primary User input and send to Second User
+    	Send_In_Main:
+        	GetKeyPressAndFlush         ;get key press
+        	JZ Receive_In_Main          ;skip if not key pressed
+        	
+        	MOV MainSentChar, AH
+        	SendCharTo MainSentChar     ;send char(signal) to another COM
+        	CALL PrimaryUserInput       ;Process for send
+        
+        ;Get Second User input
+    	Receive_In_Main:
+        	ReceiveCharFrom             ;check whether got receive char from COM or not
+        	JZ Loop_In_Main             ;skip if not key pressed
+        	
+        	MOV MainReceivedChar, AL
+        	CALL SecondaryUserInput     ;Process fo receive
 
 	JMP Loop_In_Main
+	
 MAIN ENDP
 ;=======================================================================
 
@@ -165,54 +169,56 @@ GetUserName PROC
 	;Draw System Logo
 	CALL DrawSysLogo
 	JMP UserName_Display
-
+    
+    ;Check for error
 	Input_Error_Detected:
-    CALL DrawSysLogo
-    SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+3, CurrentPage
-    DisplayStr SysErrorMsg
+        CALL DrawSysLogo
+        SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+3, CurrentPage
+        DisplayStr SysErrorMsg
 
 
 	UserName_Display:
-	;Set position from Graphics.asm
-	;Current Page value read from Consts.asm
-
-	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY, CurrentPage
-	DisplayStr SysEntryMsg
-
-	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+1, CurrentPage
-	DisplayStr SysEntry
-
-	;Clear Username (to update the latest name)
-	MOV BX,0
-	Clear_UserName:
-	MOV UserName1[BX], '$'
-	INC BX
-	CMP BX,MaxUserNameSize
-	JLE Clear_UserName
-
-	;read user input
-	ReadStr UserNameSize1
-
-	;Validate user input (must first character)
-	CMP UserName1[0], 'A'
-    JB  Input_Error_Detected		;jump if below
-    CMP UserName1[0], 'Z'
-    JBE UserName_Return		;jump if below or equal
-
-    CMP UserName1[0], 'a'
-    JB  Input_Error_Detected
-    CMP UserName1[0], 'z'
-    JA  Input_Error_Detected		;jump if above
+    	;Set cursor position from Graphics.asm for display message
+    	;Current Page value read from Consts.asm
+    
+    	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY, CurrentPage
+    	DisplayStr SysEntryMsg
+    
+    	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+1, CurrentPage
+    	DisplayStr SysEntry
+    
+    	;Clear Username (to update the latest name)
+    	MOV BX,0
+    	Clear_UserName:
+        	MOV UserName1[BX], '$'
+        	INC BX
+        	CMP BX,MaxUserNameSize
+        	JLE Clear_UserName
+    
+    	;read user input and store into username1
+    	ReadStr UserNameSize1
+    
+    	;Validate user input (first character must be 'A' - 'z')
+    	CMP UserName1[0], 'A'
+        JB  Input_Error_Detected		;jump if below than 'A'
+        CMP UserName1[0], 'Z'
+        JBE UserName_Return		        ;jump if below or equal to 'Z'
+    
+        CMP UserName1[0], 'a'
+        JB  Input_Error_Detected        ;jump if below than 'a'
+        CMP UserName1[0], 'z'
+        JA  Input_Error_Detected		;jump if above than 'z'
 
 	UserName_Return:
-	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+4, CurrentPage
-    DisplayStr SysContinueMsg
-    TransferKeyPress
+    	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+4, CurrentPage
+        DisplayStr SysContinueMsg       ;Press key to continue
+        TransferKeyPress
+        
     RET
 GetUserName ENDP
 ;=====================================================================
 
-;Handle Connection for other user to connect
+;Handle Connection for other user to connect and set username2 if connected
 WaitOtherUser PROC
 
 	CALL DrawSysLogo
@@ -220,54 +226,63 @@ WaitOtherUser PROC
 	;Print Message
 	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+3, CurrentPage
 	DisplayStr SysWaitingMsg
-
-	;Hide the cursor some where in the screen
+    
+    SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+4, CurrentPage
+    DisplayStr ExitSys
+    
+	;Hide the cursor some where in the screen (nothing to enter and display)
     SetCursorPos WindowWidth, WindowHeight, 0
 
-	MOV BX,1
+	MOV BX,1    ;BX=0001h
 
 	Send_UserName:
-	MOV CL, UserNameSize1[BX]
-	SendCharTo CL
+    	MOV CL, UserNameSize1[BX]       ;first character of username1
+    	SendCharTo CL
 
 	;check whether the msg send successful
 	UserName_Check:
 
-	;Check whether the user press ESC to quit the program
-
-	GetKeyPressAndFlush
-
-	CMP	AL,ESC_AsciiCode ;formatted in consts.asm
-	JNE	Continue_Receive_UserName
-	MOV	AX,4C00H				;else exit from system
-	INT	21H
+    	;Check whether the user press ESC to quit the program
+    
+    	GetKeyPressAndFlush             ;get keypress and clear buffer
+    
+    	CMP	AL,ESC_AsciiCode            ;formatted in consts.asm
+    	JNE	Continue_Receive_UserName
+    	
+    	MOV	AX,4C00H				    ;else exit from system to Dosbox
+    	INT	21H
 
 	Continue_Receive_UserName:
-	ReceiveCharFrom
-	JZ	UserName_Check
-
-	MOV UserNameSize2[BX],AL
-	INC BX
-	CMP BX, MaxUserNameSize
-	JLE Send_UserName
-
-	ClearKeyBuffer
+    	ReceiveCharFrom                 ;receive character from another COM
+    	JZ	UserName_Check
+        
+        ;set username2
+    	MOV UserNameSize2[BX],AL
+    	INC BX
+    	CMP BX, MaxUserNameSize
+    	JLE Send_UserName
+    
+    	ClearKeyBuffer                  ;clear the key buffer
 
 	RET
 WaitOtherUser ENDP
 ;========================================================================
 
-;Primary User Input
+;Process Primary User Input
 PrimaryUserInput PROC
+    
 	InputProcessing MainSentChar, 1
 	RET
+	
 PrimaryUserInput ENDP
 ;========================================================================
 
-;Secondary User Input
+;Process Secondary User Input
 SecondaryUserInput PROC
+    
 	InputProcessing MainReceivedChar, 2
 	RET
+	
 SecondaryUserInput ENDP
 ;========================================================================
 
@@ -620,9 +635,8 @@ DrawSysLogo PROC
 	SetCursorPos SysLogoX+49, SysLogoY+6, CurrentPage
 	DisplayChar	SysTitleChar
 
-
-
 	RET
+	
 DrawSysLogo ENDP
 ;======================================================================================================
 
@@ -640,7 +654,7 @@ SelectionScreen PROC
     DisplayStr SysConnectMsg
     DisplayStr UserName2
 
-
+    ;Print InvitationBar's message
 	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+4, CurrentPage
 	DisplayStr OptMsg
 	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+6, CurrentPage
@@ -664,26 +678,26 @@ DrawInvitationBar PROC
 
 	;Display Invitation message for Alert
 	InviteChatSent:
-	CMP ChatInvitation, 1
-	JNE InviteChatReceived
-	SetCursorPos MsgStartAtMarginX, SysInvBarStartAtMarginY+SysInvBarBorderWidth, CurrentPage
-	DisplayStr SendChatInvitation
-	DisplayStr UserName2
+    	CMP ChatInvitation, 1           ;COM1 pressed F1
+    	JNE InviteChatReceived
+    	SetCursorPos MsgStartAtMarginX, SysInvBarStartAtMarginY+SysInvBarBorderWidth, CurrentPage
+    	DisplayStr SendChatInvitation
+    	DisplayStr UserName2
 	;===============================================================================================
 
 	InviteChatReceived:
-	CMP ChatInvitation, 2
-	JNE InviteReturn
-	SetCursorPos MsgStartAtMarginX, SysInvBarStartAtMarginY+SysInvBarBorderWidth, CurrentPage
-    DisplayStr ReceivedChatInvitation
-    DisplayStr UserName2
+    	CMP ChatInvitation, 2           ;COM2 pressed F1
+    	JNE InviteReturn
+    	SetCursorPos MsgStartAtMarginX, SysInvBarStartAtMarginY+SysInvBarBorderWidth, CurrentPage
+        DisplayStr ReceivedChatInvitation
+        DisplayStr UserName2
 	;===============================================================================================
 
 	InviteReturn:
+	
 	RET
+	
 DrawInvitationBar ENDP
 ;===================================================================================================
-
-
 
 END MAIN
