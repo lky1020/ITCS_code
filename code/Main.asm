@@ -143,7 +143,7 @@ MAIN PROC FAR
 	;Get Prim User input and send to Second User
 
 	Send_In_Main:
-	GetKeyEnterAndFlush
+	GetKeyPressAndFlush
 	JZ Receive_In_Main
 	MOV MainSentChar, AH
 	SendCharTo MainSentChar
@@ -170,13 +170,13 @@ GetUserName PROC
     CALL DrawSysLogo
     SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+3, CurrentPage
     DisplayStr SysErrorMsg
-   
+
 
 	UserName_Display:
 	;Set position from Graphics.asm
 	;Current Page value read from Consts.asm
 
-	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY, CurrentPage 
+	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY, CurrentPage
 	DisplayStr SysEntryMsg
 
 	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+1, CurrentPage
@@ -200,21 +200,21 @@ GetUserName PROC
     JBE UserName_Return		;jump if below or equal
 
     CMP UserName1[0], 'a'
-    JB  Input_Error_Detected	
+    JB  Input_Error_Detected
     CMP UserName1[0], 'z'
     JA  Input_Error_Detected		;jump if above
 
 	UserName_Return:
 	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+4, CurrentPage
     DisplayStr SysContinueMsg
-    WaitKeyEnter
+    TransferKeyPress
     RET
 GetUserName ENDP
 ;=====================================================================
 
 ;Handle Connection for other user to connect
 WaitOtherUser PROC
-	
+
 	CALL DrawSysLogo
 
 	;Print Message
@@ -231,11 +231,11 @@ WaitOtherUser PROC
 	SendCharTo CL
 
 	;check whether the msg send successful
-	UserName_Check: 
+	UserName_Check:
 
 	;Check whether the user press ESC to quit the program
 
-	GetKeyEnterAndFlush
+	GetKeyPressAndFlush
 
 	CMP	AL,ESC_AsciiCode ;formatted in consts.asm
 	JNE	Continue_Receive_UserName
@@ -251,7 +251,7 @@ WaitOtherUser PROC
 	CMP BX, MaxUserNameSize
 	JLE Send_UserName
 
-	ClearKeyQueue
+	ClearKeyBuffer
 
 	RET
 WaitOtherUser ENDP
@@ -494,7 +494,7 @@ DrawSysLogo PROC
 	DisplayChar	SysTitleChar
 	SetCursorPos SysLogoX+39, SysLogoY+2, CurrentPage
 	DisplayChar	SysTitleChar
-	
+
 	;B logo 'Center -'
 	SetCursorPos SysLogoX+34, SysLogoY+3, CurrentPage
 	DisplayChar	SysTitleChar
@@ -621,7 +621,7 @@ DrawSysLogo PROC
 	DisplayChar	SysTitleChar
 
 
-	
+
 	RET
 DrawSysLogo ENDP
 ;======================================================================================================
@@ -638,8 +638,8 @@ SelectionScreen PROC
     DisplayStr UserName1
     SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+1, CurrentPage
     DisplayStr SysConnectMsg
-    DisplayStr UserName2 
-	
+    DisplayStr UserName2
+
 
 	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+4, CurrentPage
 	DisplayStr OptMsg
