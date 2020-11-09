@@ -132,7 +132,7 @@ MAIN PROC FAR
 	MOV DS,AX
 
 	;Call macro in Port.asm
-	InitPort
+	InitSerialPort
 
 	CALL GetUserName
 	CALL WaitOtherUser
