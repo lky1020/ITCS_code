@@ -8,6 +8,8 @@ WindowWidth                 EQU     80
 WindowHeight                EQU     25
 CurrentPage                 EQU     0
 MaxUserNameSize             EQU     16
+MaxMsgSize					EQU		200
+
 
 ;Keys codes
 ESC_ScanCode                EQU     01H

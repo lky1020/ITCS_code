@@ -1,18 +1,4 @@
-;Author:Omar Bazaraa
-;Date:29-10-2016
-;Macros for some graphics interrupts
-;----------------------------------------------
-
-;Change video mode: 
-;03H for 80x25 text mode (16 colors, 8 pages)
-;04H for 320x200 graphics mode (4 colors)
-;06H for 640x200 graphics mode (2 colors)
-;13H for 320x200 graphics mode (256 colors)
-SetVideoMode MACRO Mode
-    MOV AH, 00H
-    MOV AL, Mode
-    INT 10H
-ENDM SetVideoMode
+;BACS 1024 Assignment Hardware to Hardware Com (Layout Function Setting)
 
 ;Set cursor position to (X, Y) in PageNum
 SetCursorPos MACRO X, Y, PageNum
