@@ -1,16 +1,11 @@
-;BACS1024 - Assignment Hardware to Hardware Com (Chat Module)
-;============================================================================================
-;                                   Start of Chat Module
-;============================================================================================
-
 DrawChatArea MACRO Y, Username
     ;Draw separator line
     DrawLine 0, Y, 1, ChatAreaWidth, ChatLineChar, ChatLineColor, CurrentPage
-
+    
     ;Print user name
     SetCursorPos ChatMargin, Y+1, CurrentPage
     DisplayStr Username
-
+    
     ;Draw line under username
     DrawLine 0, Y+2, 1, MaxUserNameSize+1, ChatLineChar, ChatLineColor, CurrentPage
 ENDM DrawChatArea
@@ -29,37 +24,41 @@ ENDM DrawInfoBar
 ;===============================================================
 
 ;Process a given user input. Called from within a procedure
-ProcessInput MACRO Char, X, Y, OffsetY
-    LOCAL CheckEscape, CheckEnter, CheckBackspace, CheckPrintable, AdjustCursorPos, Scroll, Return
-
+;User = 1 (Send)
+;User = 2 (Receive)
+ProcessInput MACRO Char, X, Y, OffsetY, User       
+    LOCAL CheckEscape, CheckEnter, CheckBackspace, CheckPrintable, AdjustCursorPos, Return
     ;Check if ESC is pressed
     CheckEscape:
     CMP Char, ESC_AsciiCode
-    JNE CheckEnter
+    JNE CheckBackspace
     MOV IsChatEnded, 1
     RET
     ;==================================
-
-    ;Check if Enter is pressed
-    CheckEnter:
-    CMP Char, Enter_AsciiCode
-    JNE CheckBackspace
-    MOV X, ChatMargin
-    INC Y
-    JMP Scroll
-    ;==================================
-
+      
     ;Check if Backspace is pressed
     CheckBackspace:
     CMP Char, Back_AsciiCode
-    JNE CheckPrintable
+    JNE CheckEnter
     CMP X, ChatMargin
     JBE CheckPrintable
     MOV Char, ' '
     DEC X
+    DEC UserMsgIndex
     SetCursorPos X, Y, CurrentPage
     DisplayChar Char
     RET
+    ;==================================
+    
+    ;Check if Enter is pressed
+    CheckEnter:
+    CMP Char, Enter_AsciiCode
+    JNE CheckPrintable
+    MOV X, ChatMargin
+    INC Y
+
+    DisplayInStr Char, X, Y, OffsetY
+        
     ;==================================
 
     ;Check if printable character is pressed
@@ -68,12 +67,27 @@ ProcessInput MACRO Char, X, Y, OffsetY
     JB Return
     CMP Char, '~'   ;Compare with highest printable ascii value
     JA Return
-
+    
     ;Print char
     SetCursorPos X, Y, CurrentPage
     DisplayChar Char
-    ;==================================
+    
+    ;If receive, no character store needed
+    MOV AL, 1h
+    AND AL, User        ;0001(1) AND 0001(1) = 0001(1) 
+    CMP AL, 1
+    JNE AdjustCursorPos
+    
+    ;store char
+    MOV BH, 0h
+    MOV BL, UserMsgIndex
+    
+    MOV AL,Char
+    MOV UserMsg[BX], AL
+    INC UserMsgIndex
 
+    ;==================================
+    
     ;Adjust new cursor position after printing the character
     AdjustCursorPos:
     INC X
@@ -81,20 +95,52 @@ ProcessInput MACRO Char, X, Y, OffsetY
     JL Return
     MOV X, ChatMargin
     INC Y
-    ;==================================
 
-    ;Scroll chat area one step up if chat area is full
-    Scroll:
-    CMP Y, ChatAreaHeight+OffsetY-1
-    JBE Return
-    DEC Y
-    ScrollUp ChatMargin, OffsetY+3, ChatAreaWidth-ChatMargin, ChatAreaHeight+OffsetY-1, 1
     ;==================================
-
+    
     Return:
 ENDM ProcessInput
 ;===============================================================
 
+DisplayInStr MACRO Char, X, Y, OffsetY
+    LOCAL Checking, Sending, Return, Scroll
+    
+    MOV SI,0
+    Checking:
+        
+        MOV AL, UserMsg[SI]
+        CMP AL, '$'
+        JE Scroll
+        
+        Sending:
+            MOV ChatToSent, AL
+            SendCharTO ChatToSent
+        
+            INC SI
+            
+            ;Check whether is last character
+            MOV AL, 0DH
+            MOV BH, 0H
+            MOV BL, UserMsgIndex
+            CMP SI, BX
+            JE Sending 
+
+        JMP Checking
+
+    ;Scroll chat area one step up if chat area is full
+    Scroll:
+        CALL ClearMsgString
+        
+        CMP Y, ChatAreaHeight+OffsetY-1
+        JBE Return
+        DEC Y
+        ScrollUp ChatMargin, OffsetY+3, ChatAreaWidth-ChatMargin, ChatAreaHeight+OffsetY-1, 1
+
+    
+    Return:
+    RET
+ENDM DisplayInStr
+;===============================================================
 ;Includes
 INCLUDE code\Consts.asm
 INCLUDE code\Graphics.asm
@@ -119,9 +165,15 @@ User1CursorY                DB      0
 User2CursorX                DB      0
 User2CursorY                DB      12
 ChatSentChar                DB      ?
+ChatToSent                  DB      ?
 ChatReceivedChar            DB      ?
 IsChatEnded                 DB      0
 EndChatMsg                  DB      'Press ESC to end chatting...$'
+UserMsgSize	                DB	    MaxMsgSize, ?
+UserMsg		                DB	    MaxMsgSize dup('$')
+UserMsgIndex                DB      0
+;==========================================
+Ent_Char                    DB      ?
 
 ;Screen adjust variables
 ChatAreaWidth               EQU     WindowWidth
@@ -129,6 +181,7 @@ ChatAreaHeight              EQU     (WindowHeight-3)/2
 ChatMargin                  EQU     1
 ChatLineColor               EQU     0FH
 ChatLineChar                DB      '-'
+
 ;===============================================================
 
 .CODE
@@ -137,30 +190,32 @@ ReadyToChat PROC FAR
     CALL InitChatRoom
 
     Chat_Loop:
-
+    ;MOV UserMsg[0], 0DH
+    ;MOV UserMsg[1], 0AH
+    
     ;Set the cursor to the primary user chat area
     SetCursorPos User1CursorX, User1CursorY, CurrentPage
-
+    
     ;Get primary user input and send it to secondary user
     Chat_Send:
-    GetKeyPressAndFlush
-    JZ Chat_Receive                 ;Skip processing user input if no key is pressed
-    MOV ChatSentChar, AL
-    SendCharTo ChatSentChar
-    CALL ProcessPrimaryInput
-
+    
+        GetKeyPressAndFlush
+        JZ Chat_Receive                 ;Skip processing user input if no key is pressed
+        MOV ChatSentChar, AL
+        CALL ProcessPrimaryInput
+    
     ;Get secondary user input
     Chat_Receive:
-    ReceiveCharFrom
-    JZ Chat_Check                   ;Skip processing user input if no key is received
-    MOV ChatReceivedChar, AL
-    CALL ProcessSecondaryInput
-
+        ReceiveCharFrom
+        JZ Chat_Check                   ;Skip processing user input if no key is received
+        MOV ChatReceivedChar, AL
+        CALL ProcessSecondaryInput
+    
     ;Finally check if any user pressed ESC to quit chat room
     Chat_Check:
-    CMP IsChatEnded, 0
-    JZ Chat_Loop
-
+        CMP IsChatEnded, 0
+        JZ Chat_Loop
+    
     RET
 ReadyToChat ENDP
 ;===============================================================
@@ -169,37 +224,55 @@ ReadyToChat ENDP
 InitChatRoom PROC
     ;Clear the entire screen
     ClearScreen 0, 0, WindowWidth, WindowHeight
-
+    
     ;Draw both users chatting area
     DrawChatArea 0, UserName1
     DrawChatArea ChatAreaHeight, UserName2
-
+    
     ;Draw information bar
     DrawInfoBar ChatAreaHeight*2
-
+    
     ;Set chat variables
     MOV User1CursorX, ChatMargin
     MOV User1CursorY, 3
     MOV User2CursorX, ChatMargin
     MOV User2CursorY, ChatAreaHeight+3
     MOV IsChatEnded, 0
-
+    
     RET
 InitChatRoom ENDP
 ;===============================================================
 
 ;Process primary user input
 ProcessPrimaryInput PROC
-    ProcessInput ChatSentChar, User1CursorX, User1CursorY, 0
+    ProcessInput ChatSentChar, User1CursorX, User1CursorY, 0, 1
     RET
 ProcessPrimaryInput ENDP
 ;===============================================================
 
 ;Process secondary user input
 ProcessSecondaryInput PROC
-    ProcessInput ChatReceivedChar, User2CursorX, User2CursorY, ChatAreaHeight
+    ProcessInput ChatReceivedChar, User2CursorX, User2CursorY, ChatAreaHeight, 2
     RET
 ProcessSecondaryInput ENDP
 ;===============================================================
 
+;Clear string
+ClearMsgString  PROC
+   
+    ;Clear msg for user1 
+	MOV BX,0
+	Clear_Msg:
+	    mov al,UserMsg[BX]
+    	MOV al, '$'
+    	mov UserMsg[BX],al
+    	INC BX
+    	
+    	CMP UserMsg[BX], al
+    	JNE Clear_Msg
+        
+   MOV al,0
+   MOV UserMsgIndex,al
+   ret 
+ClearMsgString ENDP
 END

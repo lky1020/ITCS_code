@@ -15,7 +15,7 @@ ENDM TransferKeyPress
 
 ;Check if a key is pressed or not (ZF = 0 is pressed, ZF = 1 is not pressed)
 GetKeyPress MACRO
-    
+
 	MOV AH,01H
 	INT 16H
 	

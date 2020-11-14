@@ -40,7 +40,7 @@ ProcessInput MACRO Char, X, Y, OffsetY
     CheckEscape:
     CMP Char, ESC_AsciiCode
     JNE CheckEnter
-    MOV IsChatEnded, 1
+    MOV IsChatEnded, 1  
     RET
     ;==================================
     
