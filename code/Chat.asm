@@ -43,8 +43,8 @@ ProcessInput MACRO Char, X, Y, OffsetY, User
     CMP X, ChatMargin
     JBE CheckPrintable
     MOV Char, ' '
-    DEC X
     DEC UserMsgIndex
+    DEC X
     SetCursorPos X, Y, CurrentPage
     DisplayChar Char
     RET
@@ -173,7 +173,6 @@ UserMsgSize	                DB	    MaxMsgSize, ?
 UserMsg		                DB	    MaxMsgSize dup('$')
 UserMsgIndex                DB      0
 ;==========================================
-Ent_Char                    DB      ?
 
 ;Screen adjust variables
 ChatAreaWidth               EQU     WindowWidth
@@ -190,9 +189,7 @@ ReadyToChat PROC FAR
     CALL InitChatRoom
 
     Chat_Loop:
-    ;MOV UserMsg[0], 0DH
-    ;MOV UserMsg[1], 0AH
-    
+
     ;Set the cursor to the primary user chat area
     SetCursorPos User1CursorX, User1CursorY, CurrentPage
     
@@ -256,7 +253,6 @@ ProcessSecondaryInput PROC
     RET
 ProcessSecondaryInput ENDP
 ;===============================================================
-
 ;Clear string
 ClearMsgString  PROC
    
@@ -275,4 +271,7 @@ ClearMsgString  PROC
    MOV UserMsgIndex,al
    ret 
 ClearMsgString ENDP
+;================================================================
+
+
 END
