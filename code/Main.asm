@@ -1,12 +1,12 @@
 ;BACS 1024 - Hardware to Hardware Communication (Main)
 ;procedure to carry out for input process
 InputProcessing MACRO Char, User
-	LOCAL Chat_Checking, Chatting_Start, Quit_Checking, Quit, Reset, Return
+	LOCAL Chat_Checking, Sound_Checking, Sound_start, Chatting_Start, Quit_Checking, Quit, Reset, Return
 
 	;Check F1 input
 	Chat_Checking:
     	CMP Char, F1_ScanCode       ;check whether F1 pressed
-    	JNE Quit_Checking
+    	JNE Sound_Checking
     
     	MOV AL, ChatInvitation
     	OR AL, User                 ;0001(1) OR 0010(2) = 0011(3)
@@ -23,7 +23,26 @@ InputProcessing MACRO Char, User
         	CALL SelectionScreen    
 	RET
 	;========================
+    
+    ;Check F2 input
+	Sound_Checking:
+    	CMP Char, F2_ScanCode       ;check whether F2 pressed
+    	JNE Quit_Checking
+        
+        ;only user 1 can access the sound player
+        MOV AL, User                  
+        CMP AL, 1
+        JE Sound_start
+        
+        CALL SelectionScreen        ;Refresh the main menu, to show message in notibar for the chat
+    	RET
 
+        Sound_start:
+        	CALL SoundPlayer
+        	CALL SelectionScreen     
+	RET
+	;========================
+    
 	;Check ESC input
 	Quit_Checking:
     	CMP Char, ESC_ScanCode
@@ -62,6 +81,7 @@ PUBLIC UserNameSize2, UserName2
 
 ;External variables (access the PUBLIC of chat) - Name: type
 EXTRN ReadyToChat: FAR
+EXTRN SoundPlayer: FAR
 ;======================================================================================
 								;Start of Main Module
 ;======================================================================================
@@ -108,6 +128,7 @@ SysWelcome				DB		'Welcome to Our System $'
 SysConnectMsg			DB		'Congratulations! You are connected with $'
 OptMsg					DB		'Please choose an option to continue: $'
 SysChatMenu				DB		'[F1]	To Start Chatting$'
+SysSoundMenu			DB		'[F2]	To Sound Player$'
 ExitSys					DB		'[ESC]	To Exit System$'
 ChatInvitation			DB		0 ;set default value for invitations
 SendChatInvitation		DB		'You have sent a chat invitation to $'
@@ -292,7 +313,7 @@ DrawSysLogo PROC
 
 	ClearScreen 0,0,WindowWidth,WindowHeight
 
-	;Color a portion of the screen fr the game logo
+	;Color a portion of the screen for the system logo
 	DrawLine SysLogoX, SysLogoY, SysLogoHeight, SysLogoWidth, ' ',SysLogoColor, CurrentPage
 
 	;Draw for System Title
@@ -655,10 +676,12 @@ SelectionScreen PROC
     DisplayStr UserName2
 
     ;Print InvitationBar's message
-	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+4, CurrentPage
+	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+3, CurrentPage
 	DisplayStr OptMsg
-	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+6, CurrentPage
+	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+5, CurrentPage
 	DisplayStr SysChatMenu
+	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+6, CurrentPage
+	DisplayStr SysSoundMenu
 	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+7, CurrentPage
 	DisplayStr ExitSys
 
