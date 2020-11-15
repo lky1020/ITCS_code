@@ -171,14 +171,13 @@ EndChatMsg                  DB      'Press ESC to end chatting...$'
 UserMsgSize	                DB	    MaxMsgSize, ?
 UserMsg		                DB	    MaxMsgSize dup('$')
 UserMsgIndex                DB      0
-TestStr                     DB      "I am here$"
 ;==========================================
 
 ;Screen adjust variables
 ChatAreaWidth               EQU     WindowWidth
 ChatAreaHeight              EQU     (WindowHeight-3)/2
 ChatMargin                  EQU     1
-ChatLineColor               EQU     0FH
+ChatLineColor               EQU     0BH
 ChatLineChar                DB      '-'
 
 ;===============================================================
@@ -227,27 +226,9 @@ ReadyToChat PROC FAR
         JZ Chat_Loop
     RET
     ;=========================================================
-    ResetMsgAfterBackspace:
-     DisplayStr TestStr
      RET
 ReadyToChat ENDP
 ;===============================================================
-
-ResetMsgAfterBack PROC
-
-  
-    ;DEC UserMsgIndex
-    ;store char
-    ;MOV BH, 0h
-    ;MOV BL, UserMsgIndex
-    
-    ;MOV AL,'$'
-    ;MOV UserMsg[BX], AL
-
-    ;CALL ProcessPrimaryInput
-    ;RET
-ResetMsgAfterBack ENDP
-
 ;Initialize chat room
 InitChatRoom PROC
     ;Clear the entire screen
