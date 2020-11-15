@@ -28,6 +28,7 @@ ENDM DrawInfoBar
 ;User = 2 (Receive)
 ProcessInput MACRO Char, X, Y, OffsetY, User       
     LOCAL CheckEscape, CheckEnter, CheckBackspace, CheckPrintable, AdjustCursorPos, Return
+    
     ;Check if ESC is pressed
     CheckEscape:
     CMP Char, ESC_AsciiCode
@@ -43,7 +44,6 @@ ProcessInput MACRO Char, X, Y, OffsetY, User
     CMP X, ChatMargin
     JBE CheckPrintable
     MOV Char, ' '
-    DEC UserMsgIndex
     DEC X
     SetCursorPos X, Y, CurrentPage
     DisplayChar Char
@@ -58,7 +58,6 @@ ProcessInput MACRO Char, X, Y, OffsetY, User
     INC Y
 
     DisplayInStr Char, X, Y, OffsetY
-        
     ;==================================
 
     ;Check if printable character is pressed
@@ -172,6 +171,7 @@ EndChatMsg                  DB      'Press ESC to end chatting...$'
 UserMsgSize	                DB	    MaxMsgSize, ?
 UserMsg		                DB	    MaxMsgSize dup('$')
 UserMsgIndex                DB      0
+TestStr                     DB      "I am here$"
 ;==========================================
 
 ;Screen adjust variables
@@ -184,7 +184,7 @@ ChatLineChar                DB      '-'
 ;===============================================================
 
 .CODE
-;Start chat room between the two players
+;Start chat room between the two user
 ReadyToChat PROC FAR
     CALL InitChatRoom
 
@@ -199,8 +199,21 @@ ReadyToChat PROC FAR
         GetKeyPressAndFlush
         JZ Chat_Receive                 ;Skip processing user input if no key is pressed
         MOV ChatSentChar, AL
-        CALL ProcessPrimaryInput
+        CMP AL,Back_AsciiCode 
+        JNE  J1
+         
+              DEC UserMsgIndex
+              ;store char
+              MOV BH, 0h
+              MOV BL, UserMsgIndex
     
+              MOV AL,'$'
+              MOV UserMsg[BX], AL
+             
+        J1:
+        CALL ProcessPrimaryInput
+        
+       
     ;Get secondary user input
     Chat_Receive:
         ReceiveCharFrom
@@ -212,10 +225,28 @@ ReadyToChat PROC FAR
     Chat_Check:
         CMP IsChatEnded, 0
         JZ Chat_Loop
-    
     RET
+    ;=========================================================
+    ResetMsgAfterBackspace:
+     DisplayStr TestStr
+     RET
 ReadyToChat ENDP
 ;===============================================================
+
+ResetMsgAfterBack PROC
+
+  
+    ;DEC UserMsgIndex
+    ;store char
+    ;MOV BH, 0h
+    ;MOV BL, UserMsgIndex
+    
+    ;MOV AL,'$'
+    ;MOV UserMsg[BX], AL
+
+    ;CALL ProcessPrimaryInput
+    ;RET
+ResetMsgAfterBack ENDP
 
 ;Initialize chat room
 InitChatRoom PROC
