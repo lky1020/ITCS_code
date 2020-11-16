@@ -1,5 +1,89 @@
                                 ;Sound Module - BACS 1024
 ;===============================================================================================
+                                ;MACRO
+;===============================================================================================
+SoundInputProcessing MACRO Choice
+    Local Check_F1, Check_F2, Check_F3, Check_F4, Sound_ESC, Return
+    
+    ;Check if F1 is pressed
+    Check_F1:
+        cmp Choice, F1_ScanCode  
+        jne Check_F2
+        
+        lea si,notes1
+        mov ch,00h
+        mov cl, 2                   ;number of notes
+    
+        call PlaySound 
+        
+    call SoundPlayerScreen          ;refresh sound player screen    
+    RET
+    ;==========================
+    
+    ;Check if F2 is pressed
+    Check_F2:
+        cmp Choice, F2_ScanCode  
+        jne Check_F3
+        
+        lea si,notes2
+        mov ch,00h
+        mov cl, 2                   ;number of notes
+        
+        call PlaySound
+        
+    call SoundPlayerScreen          ;refresh sound player screen    
+    RET
+    ;==========================
+    
+    ;Check if F3 is pressed
+    Check_F3:
+        cmp Choice, F3_ScanCode  
+        jne Check_F4
+        
+        lea si,notes3
+        mov ch,00h
+        mov cl, 2                   ;number of notes
+        
+        call PlaySound
+        
+    call SoundPlayerScreen          ;refresh sound player screen    
+    RET
+    ;==========================
+    
+    ;Check if F4 is pressed
+    Check_F4:
+        cmp Choice, F4_ScanCode  
+        jne Sound_ESC
+        
+        lea si,notes4
+        mov ch,00h
+        mov cl, 2                   ;number of notes
+        
+        call PlaySound
+        
+    call SoundPlayerScreen          ;refresh sound player screen    
+    RET
+    ;==========================        
+    
+    ;Check if ESC is pressed
+    Sound_ESC:
+        cmp Choice, ESC_ScanCode
+        jne Return
+        
+        ;assign 1 to SoundExit to indicate exit 
+        mov al, 1
+        mov SoundExit,al 
+    
+    call SoundPlayerScreen      ;refresh sound player screen    
+    RET
+    ;==========================
+    
+    Return:    
+
+ENDM SoundInputProcessing 
+;===============================================================================================
+                                ;START OF SOUND MODULE
+;===============================================================================================
 ;Includes (Include the outside file for calling the variables or functions)
 INCLUDE code\Consts.asm
 INCLUDE code\Graphics.asm
@@ -43,78 +127,52 @@ ExitSound				DB		'[ESC]	To Exit Sound Player$'
     ;sound variable 
     speakerStatus db ?          ;store the status of speaker
     
-    delay1 equ 7500h            ;used to delay the notes
-    delay2 equ 0100h
+    delay1 equ 7000h            ;used to delay the notes
+    delay2 equ 0150h
     
+    ;Data
+    SoundChoice         DB      ?   
+    SoundExit           DB      0   ;1 = exit
     
     ;The notes of the sound
-    notes dw 262,277,294,311,330,349,370,392,415,440,466,494
+    notes1              DW      460, 380
+    notes2              DW      1020, 240
+    notes3              DW      846, 551
+    notes4              DW      324, 119
 
-
-;TESTING PURPOSE
-    ;username1           DB      "lky1020$"
-    
 .code
 ;================================================================================================
                                 ;Start Chat Room between Two Users
 ;================================================================================================
 SoundPlayer PROC FAR
-    ;mov ax,@data
-    ;mov ds,ax
-    
     
     ;Initialize Sound Player
     call SoundPlayerScreen
     
-    ;TURN SPEAKER ON
-    in      al, 61h         ; get speaker status
-    mov     speakerStatus,al; save speaker status (for turn off purpose)
-                            
-    or      al, 00000011b   ; set lowest 2 bits to on for Timer 2 gate(speaker) && data
-    out     61h, al         ; turn speaker on
-    
-    lea si,notes
-    mov ch,00h
-    mov cl, 12
-    
-    L1:
+    Loop_In_Sound:
+
+        ;Get user input
+        GetKeyPressAndFlush         ;get key press
+        JZ Loop_In_Sound            ;skip if not key pressed
         
-        mov bx,[si]
+        mov soundChoice, ah         ;store scan_code of key pressed
+        call SoundUserInput
         
-        ;store cx with dx
-        mov dx,cx
+        ;call PlaySound 
         
-        ;delay
-        mov cx,delay1
-        
-            wait1:
-                push cx         ;store delay1 into stack,need put delay2 into cx
-                mov cx,delay2
-                
-            wait2:
-                loop wait2      ;wait delay2 run finish
-                
-                pop cx          ;retrieve delay from stack
-                loop wait1      ;wait delay1 run finish      
+        ;check whether user want to Exit sound player
+        mov al, soundExit
+        cmp al, 1           ;1 = exit
+        je SoundPlayer_Exit 
     
-        call setPitch
+    JMP Loop_In_Sound
+    
         
-        mov ax,0002h
-        add si,ax
-        
-        mov cx,dx
-        
-        loop L1
-    
-    ;TURN SPEAKER OFF
-    mov     al, speakerStatus; get original speaker status
-    
-    and     al, 11111100b   ; clear lowest 2 bits to off timer 2 for gate(speaker) and data    
-    out     61h, al         ;turn speaker off
-    
-    ;mov ah,4ch
-    ;int 21h
-    
+    ;initialize soundExit before go back to main menu
+    SoundPlayer_Exit:
+        mov al, 0
+        mov soundExit,al     
+
     RET
 SoundPlayer ENDP
 ;-------------------------------------------------------------------------
@@ -157,11 +215,81 @@ SoundPlayerScreen PROC
     ;Hide Cursor
 	SetCursorPos WindowWidth, WindowHeight, 0
 	
-	
     RET   
 SoundPlayerScreen ENDP
 ;-------------------------------------------------------------------------
-setPitch PROC
+;Process user input
+SoundUserInput PROC
+    
+    SoundInputProcessing soundChoice
+    RET
+    
+SoundUserInput ENDP
+;-------------------------------------------------------------------------
+;Turn on the Speaker
+SpeakerOn PROC
+    ;TURN SPEAKER ON
+    in      al, 61h         ; get speaker status
+    mov     speakerStatus,al; save speaker status (for turn off purpose)
+                            
+    or      al, 00000011b   ; set lowest 2 bits to on for Timer 2 gate(speaker) && data
+    out     61h, al         ; turn speaker on    
+    
+    RET
+SpeakerOn ENDP
+;-------------------------------------------------------------------------
+;Turn off the speaker
+SpeakerOff PROC
+    ;TURN SPEAKER OFF
+    mov     al, speakerStatus; get original speaker status
+    
+    and     al, 11111100b   ; clear lowest 2 bits to off timer 2 for gate(speaker) and data    
+    out     61h, al         ;turn speaker off
+    
+    RET
+SpeakerOff ENDP    
+;-------------------------------------------------------------------------
+;Play sound
+ PlaySound PROC
+    ;Play Sound
+    call SpeakerOn
+    
+    soundLoop:
+        
+        mov bx,[si]
+        
+        ;store cx with dx
+        mov dx,cx
+        
+        ;delay
+        mov cx,delay1
+        
+            wait1:
+                push cx         ;store delay1 into stack,need put delay2 into cx
+                mov cx,delay2
+                
+            wait2:
+                loop wait2      ;wait delay2 run finish
+                
+                pop cx          ;retrieve delay from stack
+                loop wait1      ;wait delay1 run finish      
+    
+        call SetPitch
+        
+        mov ax,0002h
+        add si,ax
+        
+        mov cx,dx
+        
+        loop soundLoop
+    
+    call SpeakerOff
+    
+    RET
+ PlaySound ENDP
+;-------------------------------------------------------------------------
+
+SetPitch PROC
     
     ;Specify that timer channel 2 is to be user
         ;10 = set time channel 2

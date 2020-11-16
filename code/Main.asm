@@ -174,7 +174,7 @@ MAIN PROC FAR
         ;Get Second User input
     	Receive_In_Main:
         	ReceiveCharFrom             ;check whether got receive char from COM or not
-        	JZ Loop_In_Main             ;skip if not key pressed
+        	JZ Loop_In_Main             ;skip if not char received
         	
         	MOV MainReceivedChar, AL
         	CALL SecondaryUserInput     ;Process fo receive
