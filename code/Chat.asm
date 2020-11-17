@@ -63,7 +63,7 @@ ProcessInput MACRO Char, X, Y, OffsetY, User
         CheckEscape:
             CMP Char, ESC_AsciiCode
             JNE CheckBackspace
-    
+            SendCharTO Char
             MOV IsChatEnded, 1
         RET
     ;==================================
@@ -289,23 +289,23 @@ ReadyToChat ENDP
 ProcessEmoji PROC
     
     CMP ChatSentChar, '/'
-    JNE CheckF2
+    JNE Check_2
     MOV AL, EJ1
     MOV ChatSentChar, AL
     RET
     ;===========================================
-    CheckF2:
-    CMP ChatSentChar, '*'
-    JNE CheckF3
-    MOV AL, EJ2
-    MOV ChatSentChar, AL
+    Check_2:
+        CMP ChatSentChar, '*'
+        JNE Check_3
+        MOV AL, EJ2
+        MOV ChatSentChar, AL
     RET
     ;============================================
-    CheckF3:
-    CMP ChatSentChar, '-'
-    JNE Return
-    MOV AL, EJ3
-    MOV ChatSentChar, AL
+    Check_3:
+        CMP ChatSentChar, '-'
+        JNE Return
+        MOV AL, EJ3
+        MOV ChatSentChar, AL
 
     Return:
     RET
