@@ -53,6 +53,13 @@ InputProcessing MACRO Char, User
     	JNE Reset
 
 	Quit:						    ;Back to the system
+    	
+    	;Play disconnected sound
+	    lea si, notes4
+    	mov ch,00h
+        mov cl, 2
+        call PlaySound
+    	
     	MOV AX, 4C00H
     	INT 21H
     	RET
@@ -60,6 +67,7 @@ InputProcessing MACRO Char, User
 	Reset:
     	MOV ChatInvitation, 0
     	MOV MainReceivedChar, 0
+    	
     	CALL WaitOtherUser
     	CALL SelectionScreen
 	;==================================
@@ -74,14 +82,21 @@ INCLUDE code\Consts.asm
 INCLUDE code\Graphics.asm
 INCLUDE code\Keyboard.asm
 INCLUDE code\Port.asm
+INCLUDE code\Speaker.asm
 
-;Public variables (allow access for chat)
+;Public variables (allow access for chat and sound)
 PUBLIC UserNameSize1, UserName1
 PUBLIC UserNameSize2, UserName2
 
-;External variables (access the PUBLIC of chat) - Name: type
+;External variables (access the PUBLIC of chat and sound) - Name: type
 EXTRN ReadyToChat: FAR
 EXTRN SoundPlayer: FAR
+EXTRN notes1: WORD
+EXTRN notes2: WORD
+EXTRN notes3: WORD
+EXTRN notes4: WORD
+EXTRN delay1: WORD
+EXTRN delay2: WORD
 ;======================================================================================
 								;Start of Main Module
 ;======================================================================================
@@ -159,7 +174,13 @@ MAIN PROC FAR
 	CALL GetUserName
 	CALL WaitOtherUser
 	CALL SelectionScreen
-
+	
+	;Play connected sound
+	lea si, notes1
+	mov ch,00h
+    mov cl, 2
+    call PlaySound
+    
 	Loop_In_Main:
 
     	;Get Primary User input and send to Second User
@@ -288,7 +309,14 @@ WaitOtherUser PROC
 	RET
 WaitOtherUser ENDP
 ;========================================================================
+;Play sound
+PlaySound PROC
 
+    SoundPlay
+	RET
+
+PlaySound ENDP
+;========================================================================
 ;Process Primary User Input
 PrimaryUserInput PROC
     

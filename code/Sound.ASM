@@ -1,10 +1,10 @@
-                                ;Sound Module - BACS 1024
+                          ;Sound Module - BACS 1024
 ;===============================================================================================
                                 ;MACRO
 ;===============================================================================================
 SoundInputProcessing MACRO Choice
-    Local Check_F1, Check_F2, Check_F3, Check_F4, Sound_ESC, Return
-    
+    Local Check_F1, Check_F2, Check_F3, Check_F4, Sound_ESC, Sound_Playing, Return
+
     ;Check if F1 is pressed
     Check_F1:
         cmp Choice, F1_ScanCode  
@@ -14,10 +14,7 @@ SoundInputProcessing MACRO Choice
         mov ch,00h
         mov cl, 2                   ;number of notes
     
-        call PlaySound 
-        
-    call SoundPlayerScreen          ;refresh sound player screen    
-    RET
+    JMP Sound_Playing
     ;==========================
     
     ;Check if F2 is pressed
@@ -29,10 +26,7 @@ SoundInputProcessing MACRO Choice
         mov ch,00h
         mov cl, 2                   ;number of notes
         
-        call PlaySound
-        
-    call SoundPlayerScreen          ;refresh sound player screen    
-    RET
+    JMP Sound_Playing
     ;==========================
     
     ;Check if F3 is pressed
@@ -44,10 +38,7 @@ SoundInputProcessing MACRO Choice
         mov ch,00h
         mov cl, 2                   ;number of notes
         
-        call PlaySound
-        
-    call SoundPlayerScreen          ;refresh sound player screen    
-    RET
+    JMP Sound_Playing
     ;==========================
     
     ;Check if F4 is pressed
@@ -58,11 +49,8 @@ SoundInputProcessing MACRO Choice
         lea si,notes4
         mov ch,00h
         mov cl, 2                   ;number of notes
-        
-        call PlaySound
-        
-    call SoundPlayerScreen          ;refresh sound player screen    
-    RET
+
+    JMP Sound_Playing 
     ;==========================        
     
     ;Check if ESC is pressed
@@ -78,6 +66,13 @@ SoundInputProcessing MACRO Choice
     RET
     ;==========================
     
+    Sound_Playing:
+
+        ;Play sound
+        SoundPlay
+
+        call SoundPlayerScreen          ;refresh sound player screen
+        
     Return:    
 
 ENDM SoundInputProcessing 
@@ -89,9 +84,16 @@ INCLUDE code\Consts.asm
 INCLUDE code\Graphics.asm
 INCLUDE code\Keyboard.asm
 INCLUDE code\Port.asm
+INCLUDE code\Speaker.asm
 
 ;Public variables and procedures
 PUBLIC SoundPlayer
+PUBLIC notes1
+PUBLIC notes2
+PUBLIC notes3
+PUBLIC notes4
+PUBLIC delay1
+PUBLIC delay2
 
 ;External variables and procedures
 EXTRN UserName1:BYTE
@@ -125,10 +127,8 @@ ExitSound				DB		'[ESC]	To Exit Sound Player$'
 
 ;Sound Data
     ;sound variable 
-    speakerStatus db ?          ;store the status of speaker
-    
-    delay1 equ 7000h            ;used to delay the notes
-    delay2 equ 0150h
+    delay1              DW      7000h            ;used to delay the notes
+    delay2              DW      0150h
     
     ;Data
     SoundChoice         DB      ?   
@@ -158,7 +158,6 @@ SoundPlayer PROC FAR
         mov soundChoice, ah         ;store scan_code of key pressed
         call SoundUserInput
         
-        ;call PlaySound 
         
         ;check whether user want to Exit sound player
         mov al, soundExit
@@ -172,7 +171,7 @@ SoundPlayer PROC FAR
     SoundPlayer_Exit:
         mov al, 0
         mov soundExit,al     
-
+        SendCharTO soundChoice
     RET
 SoundPlayer ENDP
 ;-------------------------------------------------------------------------
@@ -224,90 +223,6 @@ SoundUserInput PROC
     SoundInputProcessing soundChoice
     RET
     
-SoundUserInput ENDP
+SoundUserInput ENDP   
 ;-------------------------------------------------------------------------
-;Turn on the Speaker
-SpeakerOn PROC
-    ;TURN SPEAKER ON
-    in      al, 61h         ; get speaker status
-    mov     speakerStatus,al; save speaker status (for turn off purpose)
-                            
-    or      al, 00000011b   ; set lowest 2 bits to on for Timer 2 gate(speaker) && data
-    out     61h, al         ; turn speaker on    
-    
-    RET
-SpeakerOn ENDP
-;-------------------------------------------------------------------------
-;Turn off the speaker
-SpeakerOff PROC
-    ;TURN SPEAKER OFF
-    mov     al, speakerStatus; get original speaker status
-    
-    and     al, 11111100b   ; clear lowest 2 bits to off timer 2 for gate(speaker) and data    
-    out     61h, al         ;turn speaker off
-    
-    RET
-SpeakerOff ENDP    
-;-------------------------------------------------------------------------
-;Play sound
- PlaySound PROC
-    ;Play Sound
-    call SpeakerOn
-    
-    soundLoop:
-        
-        mov bx,[si]
-        
-        ;store cx with dx
-        mov dx,cx
-        
-        ;delay
-        mov cx,delay1
-        
-            wait1:
-                push cx         ;store delay1 into stack,need put delay2 into cx
-                mov cx,delay2
-                
-            wait2:
-                loop wait2      ;wait delay2 run finish
-                
-                pop cx          ;retrieve delay from stack
-                loop wait1      ;wait delay1 run finish      
-    
-        call SetPitch
-        
-        mov ax,0002h
-        add si,ax
-        
-        mov cx,dx
-        
-        loop soundLoop
-    
-    call SpeakerOff
-    
-    RET
- PlaySound ENDP
-;-------------------------------------------------------------------------
-
-SetPitch PROC
-    
-    ;Specify that timer channel 2 is to be user
-        ;10 = set time channel 2
-        ;11 = read low byte(LSB) the high byte(MSB)
-        ;011 = Output a square wave (0 and 1)
-        ;0 = count in binary
-    mov     al, 182         ; 0B6h = 1011 0110b
-    out     43h, al         ; Prepare timer to expect a value and 
-                            ; sets mode of operation(channel 2)
-    
-    
-    
-    ;Output byte to the port 42h
-    ;Port 42h is connected to the computer's speaker and issues square wave pulses used to make sounds                         
-    mov     al, bl          ; mov lower byte to al
-    out     42h, al         ; Output low byte from al to timer.
-    mov     al, bh          ; mov high byte to al 
-    out     42h, al         ; Output high byte from al to timer.    
-    
-    ret
 END
