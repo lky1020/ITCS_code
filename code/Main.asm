@@ -55,7 +55,7 @@ InputProcessing MACRO Char, User
 	Quit:						    ;Back to the system
     	
     	;Play disconnected sound
-	    lea si, notes4
+	    lea si, disconnectedSound
     	mov ch,00h
         mov cl, 2
         call PlaySound
@@ -91,10 +91,8 @@ PUBLIC UserNameSize2, UserName2
 ;External variables (access the PUBLIC of chat and sound) - Name: type
 EXTRN ReadyToChat: FAR
 EXTRN SoundPlayer: FAR
-EXTRN notes1: WORD
-EXTRN notes2: WORD
-EXTRN notes3: WORD
-EXTRN notes4: WORD
+EXTRN connectedSound: WORD
+EXTRN disconnectedSound: WORD
 EXTRN delay1: WORD
 EXTRN delay2: WORD
 ;======================================================================================
@@ -176,7 +174,7 @@ MAIN PROC FAR
 	CALL SelectionScreen
 	
 	;Play connected sound
-	lea si, notes1
+	lea si, connectedSound
 	mov ch,00h
     mov cl, 2
     call PlaySound

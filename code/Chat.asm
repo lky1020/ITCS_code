@@ -92,8 +92,12 @@ ProcessInput MACRO Char, X, Y, OffsetY, User
             MOV X, ChatMargin
             INC Y
 
-        ;MACRO to Process Send and Display in Second Screen
+            ;MACRO to Process Send and Display in Second Screen
             DisplayInStr Char, X, Y, OffsetY
+            
+            ;Play the send sound
+            call PlaySendSound
+       RET
     ;==================================
 
     ;Check if printable character is pressed (NEED TO REMOVE)
@@ -186,7 +190,7 @@ INCLUDE code\Consts.asm
 INCLUDE code\Graphics.asm
 INCLUDE code\Keyboard.asm
 INCLUDE code\Port.asm
-
+INCLUDE code\Speaker.asm
 
 ;Public variables and procedures
 PUBLIC ReadyToChat
@@ -194,6 +198,10 @@ PUBLIC ReadyToChat
 ;External variables and procedures
 EXTRN UserName1:BYTE
 EXTRN UserName2:BYTE
+EXTRN sendSound: WORD
+EXTRN receiveSound: WORD
+EXTRN delay1: WORD
+EXTRN delay2: WORD
 ;================================================================================================
 
 .MODEL SMALL
@@ -368,4 +376,16 @@ ClearMsgString  PROC
    RET
 ClearMsgString ENDP
 ;================================================================================================
+                                ;Play chat sound
+;================================================================================================
+PlaySendSound PROC
+    
+    ;Play send sound
+	lea si, sendSound
+	mov ch,00h
+    mov cl, 2
+    SoundPlay
+	RET
+	
+PlaySendSound ENDP
 END

@@ -10,7 +10,7 @@ SoundInputProcessing MACRO Choice
         cmp Choice, F1_ScanCode  
         jne Check_F2
         
-        lea si,notes1
+        lea si,connectedSound
         mov ch,00h
         mov cl, 2                   ;number of notes
     
@@ -22,7 +22,7 @@ SoundInputProcessing MACRO Choice
         cmp Choice, F2_ScanCode  
         jne Check_F3
         
-        lea si,notes2
+        lea si,sendSound
         mov ch,00h
         mov cl, 2                   ;number of notes
         
@@ -34,7 +34,7 @@ SoundInputProcessing MACRO Choice
         cmp Choice, F3_ScanCode  
         jne Check_F4
         
-        lea si,notes3
+        lea si,receiveSound
         mov ch,00h
         mov cl, 2                   ;number of notes
         
@@ -46,7 +46,7 @@ SoundInputProcessing MACRO Choice
         cmp Choice, F4_ScanCode  
         jne Sound_ESC
         
-        lea si,notes4
+        lea si,disconnectedSound
         mov ch,00h
         mov cl, 2                   ;number of notes
 
@@ -88,10 +88,10 @@ INCLUDE code\Speaker.asm
 
 ;Public variables and procedures
 PUBLIC SoundPlayer
-PUBLIC notes1
-PUBLIC notes2
-PUBLIC notes3
-PUBLIC notes4
+PUBLIC connectedSound
+PUBLIC sendSound
+PUBLIC receiveSound
+PUBLIC disconnectedSound
 PUBLIC delay1
 PUBLIC delay2
 
@@ -108,7 +108,7 @@ SoundLogoX			    EQU		12
 SoundLogoY			    EQU		5
 SoundLogoWidth		    EQU		57
 SoundLogoHeight		    EQU		7
-SoundLogoColor		    EQU		03FH
+SoundLogoColor		    EQU		3EH
 SoundMsgStartAtMarginX	EQU		SoundLogoX
 SoundMsgStartAtMarginY	EQU		SoundLogoY + SoundLogoHeight + 1
 ;===============================================================================
@@ -116,6 +116,7 @@ SoundMsgStartAtMarginY	EQU		SoundLogoY + SoundLogoHeight + 1
     
 ;System Message and String
 ;=========================
+SoundTitleChar          DB      4H
 SoundWelcome			DB		'Welcome to Our Sound Player: $'
 SoundOptMsg			    DB		'Please choose an option to play: $'
 SoundChatMenu1			DB		'[F1]	Connected Sound $'
@@ -135,10 +136,10 @@ ExitSound				DB		'[ESC]	To Exit Sound Player$'
     SoundExit           DB      0   ;1 = exit
     
     ;The notes of the sound
-    notes1              DW      460, 380
-    notes2              DW      1020, 240
-    notes3              DW      846, 551
-    notes4              DW      324, 119
+    connectedSound      DW      460, 380
+    sendSound           DW      1020, 240
+    receiveSound        DW      846, 551
+    disconnectedSound   DW      324, 119
 
 .code
 ;================================================================================================
@@ -171,7 +172,6 @@ SoundPlayer PROC FAR
     SoundPlayer_Exit:
         mov al, 0
         mov soundExit,al     
-        SendCharTO soundChoice
     RET
 SoundPlayer ENDP
 ;-------------------------------------------------------------------------
@@ -182,7 +182,278 @@ DrawSoundLogo PROC
 
 	;Color a portion of the screen for the sound logo
 	DrawLine SoundLogoX, SoundLogoY, SoundLogoHeight, SoundLogoWidth, ' ',SoundLogoColor, CurrentPage
+    
+    ;Draw for Sound Title
+    ;=====================================================
+    ;'S'
+    ;=====================================================
+    
+    ;S logo 'left |'
+    SetCursorPos SoundLogoX+9, SoundLogoY+0, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+9, SoundLogoY+1, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+9, SoundLogoY+2, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+9, SoundLogoY+3, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+9, SoundLogoY+6, CurrentPage
+    DisplayChar	SoundTitleChar
+    
+    ;S logo 'upper center -'
+    SetCursorPos SoundLogoX+10, SoundLogoY+0, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+11, SoundLogoY+0, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+12, SoundLogoY+0, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+13, SoundLogoY+0, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+14, SoundLogoY+0, CurrentPage
+    DisplayChar	SoundTitleChar
 
+    
+    ;S logo 'middle center -'
+    SetCursorPos SoundLogoX+10, SoundLogoY+3, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+11, SoundLogoY+3, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+12, SoundLogoY+3, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+13, SoundLogoY+3, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+14, SoundLogoY+3, CurrentPage
+    DisplayChar	SoundTitleChar
+    
+    ;S logo 'upper center -'
+    SetCursorPos SoundLogoX+10, SoundLogoY+6, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+11, SoundLogoY+6, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+12, SoundLogoY+6, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+13, SoundLogoY+6, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+14, SoundLogoY+6, CurrentPage
+    DisplayChar	SoundTitleChar
+    
+    ;S logo 'right |'
+    SetCursorPos SoundLogoX+15, SoundLogoY+0, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+15, SoundLogoY+3, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+15, SoundLogoY+4, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+15, SoundLogoY+5, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+15, SoundLogoY+6, CurrentPage
+    DisplayChar	SoundTitleChar
+    
+    ;=====================================================
+    ;'O'
+    ;=====================================================
+    ;O logo 'left |'
+    SetCursorPos SoundLogoX+17, SoundLogoY+0, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+17, SoundLogoY+1, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+17, SoundLogoY+2, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+17, SoundLogoY+3, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+17, SoundLogoY+4, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+17, SoundLogoY+5, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+17, SoundLogoY+6, CurrentPage
+    DisplayChar	SoundTitleChar
+    
+    ;O logo 'upper center -'
+    SetCursorPos SoundLogoX+18, SoundLogoY+0, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+19, SoundLogoY+0, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+20, SoundLogoY+0, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+21, SoundLogoY+0, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+22, SoundLogoY+0, CurrentPage
+    DisplayChar	SoundTitleChar
+    
+    ;O logo 'lower center -'
+    SetCursorPos SoundLogoX+18, SoundLogoY+6, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+19, SoundLogoY+6, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+20, SoundLogoY+6, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+21, SoundLogoY+6, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+22, SoundLogoY+6, CurrentPage
+    DisplayChar	SoundTitleChar
+    
+    ;O logo 'right |'
+    SetCursorPos SoundLogoX+23, SoundLogoY+0, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+23, SoundLogoY+1, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+23, SoundLogoY+2, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+23, SoundLogoY+3, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+23, SoundLogoY+4, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+23, SoundLogoY+5, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+23, SoundLogoY+6, CurrentPage
+    DisplayChar	SoundTitleChar
+    
+    ;=====================================================
+    ;'U'
+    ;=====================================================
+    ;U logo 'left |'
+    SetCursorPos SoundLogoX+25, SoundLogoY+0, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+25, SoundLogoY+1, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+25, SoundLogoY+2, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+25, SoundLogoY+3, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+25, SoundLogoY+4, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+25, SoundLogoY+5, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+25, SoundLogoY+6, CurrentPage
+    DisplayChar	SoundTitleChar
+    
+    ;U logo 'lower center -'
+    SetCursorPos SoundLogoX+26, SoundLogoY+6, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+27, SoundLogoY+6, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+28, SoundLogoY+6, CurrentPage
+    DisplayChar	SoundTitleChar             
+    SetCursorPos SoundLogoX+29, SoundLogoY+6, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+30, SoundLogoY+6, CurrentPage
+    DisplayChar	SoundTitleChar
+    
+    ;U logo 'right |'
+    SetCursorPos SoundLogoX+31, SoundLogoY+0, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+31, SoundLogoY+1, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+31, SoundLogoY+2, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+31, SoundLogoY+3, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+31, SoundLogoY+4, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+31, SoundLogoY+5, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+31, SoundLogoY+6, CurrentPage
+    DisplayChar	SoundTitleChar
+    
+    ;=====================================================
+    ;'N'
+    ;=====================================================
+    ;N logo 'left |'
+    SetCursorPos SoundLogoX+33, SoundLogoY+0, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+33, SoundLogoY+1, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+33, SoundLogoY+2, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+33, SoundLogoY+3, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+33, SoundLogoY+4, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+33, SoundLogoY+5, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+33, SoundLogoY+6, CurrentPage
+    DisplayChar	SoundTitleChar
+    
+    ;N logo 'middle'
+    SetCursorPos SoundLogoX+34, SoundLogoY+1, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+35, SoundLogoY+2, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+36, SoundLogoY+3, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+37, SoundLogoY+4, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+38, SoundLogoY+5, CurrentPage
+    DisplayChar	SoundTitleChar
+    
+    
+    ;N logo 'right |'
+    SetCursorPos SoundLogoX+39, SoundLogoY+0, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+39, SoundLogoY+1, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+39, SoundLogoY+2, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+39, SoundLogoY+3, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+39, SoundLogoY+4, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+39, SoundLogoY+5, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+39, SoundLogoY+6, CurrentPage
+    DisplayChar	SoundTitleChar
+    
+    ;=====================================================
+    ;'D'
+    ;=====================================================
+    ;D logo 'left |'
+    SetCursorPos SoundLogoX+41, SoundLogoY+0, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+41, SoundLogoY+1, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+41, SoundLogoY+2, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+41, SoundLogoY+3, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+41, SoundLogoY+4, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+41, SoundLogoY+5, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+41, SoundLogoY+6, CurrentPage
+    DisplayChar	SoundTitleChar
+    
+    ;D logo 'upper center -'
+    SetCursorPos SoundLogoX+42, SoundLogoY+0, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+43, SoundLogoY+0, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+44, SoundLogoY+0, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+45, SoundLogoY+0, CurrentPage
+    DisplayChar	SoundTitleChar
+    
+    ;D logo 'lower center -'
+    SetCursorPos SoundLogoX+42, SoundLogoY+6, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+43, SoundLogoY+6, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+44, SoundLogoY+6, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+45, SoundLogoY+6, CurrentPage
+    DisplayChar	SoundTitleChar
+    
+    ;D logo 'right |'
+    SetCursorPos SoundLogoX+46, SoundLogoY+1, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+47, SoundLogoY+2, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+47, SoundLogoY+3, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+47, SoundLogoY+4, CurrentPage
+    DisplayChar	SoundTitleChar
+    SetCursorPos SoundLogoX+46, SoundLogoY+5, CurrentPage
+    DisplayChar	SoundTitleChar
+    
         
     RET
 DrawSoundLogo ENDP
