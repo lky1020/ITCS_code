@@ -91,12 +91,13 @@ ProcessInput MACRO Char, X, Y, OffsetY, User
     
             MOV X, ChatMargin
             INC Y
-
+            
+            ;Play the notification sound
+            call PlayNotificationSound
+            
             ;MACRO to Process Send and Display in Second Screen
             DisplayInStr Char, X, Y, OffsetY
-            
-            ;Play the send sound
-            call PlaySendSound
+
        RET
     ;==================================
 
@@ -198,8 +199,7 @@ PUBLIC ReadyToChat
 ;External variables and procedures
 EXTRN UserName1:BYTE
 EXTRN UserName2:BYTE
-EXTRN sendSound: WORD
-EXTRN receiveSound: WORD
+EXTRN notificationSound: WORD
 EXTRN delay1: WORD
 EXTRN delay2: WORD
 ;================================================================================================
@@ -284,7 +284,7 @@ ReadyToChat PROC FAR
         
                 MOV ChatReceivedChar, AL
                 CALL ProcessSecondaryInput
-    
+
         ;Finally check if any user pressed ESC to quit chat room
             Chat_Check:
                 CMP IsChatEnded, 0
@@ -378,14 +378,23 @@ ClearMsgString ENDP
 ;================================================================================================
                                 ;Play chat sound
 ;================================================================================================
-PlaySendSound PROC
+;Play send sound
+PlayNotificationSound PROC
     
     ;Play send sound
-	lea si, sendSound
+	lea si, notificationSound
 	mov ch,00h
     mov cl, 2
-    SoundPlay
+    CALL ProcessSound
 	RET
 	
-PlaySendSound ENDP
+PlayNotificationSound ENDP
+
+;CALL the MACRO to process the sound
+ProcessSound PROC
+    
+    SoundPlay
+    RET
+    
+ProcessSound ENDP    
 END

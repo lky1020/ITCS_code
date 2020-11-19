@@ -57,7 +57,7 @@ InputProcessing MACRO Char, User
     	;Play disconnected sound
 	    lea si, disconnectedSound
     	mov ch,00h
-        mov cl, 2
+        mov cl, 3
         call PlaySound
     	
     	MOV AX, 4C00H
@@ -176,7 +176,7 @@ MAIN PROC FAR
 	;Play connected sound
 	lea si, connectedSound
 	mov ch,00h
-    mov cl, 2
+    mov cl, 3
     call PlaySound
     
 	Loop_In_Main:

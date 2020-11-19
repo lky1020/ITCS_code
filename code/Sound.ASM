@@ -3,7 +3,7 @@
                                 ;MACRO
 ;===============================================================================================
 SoundInputProcessing MACRO Choice
-    Local Check_F1, Check_F2, Check_F3, Check_F4, Sound_ESC, Sound_Playing, Return
+    Local Check_F1, Check_F2, Check_F3, Sound_ESC, Sound_Playing, Return
 
     ;Check if F1 is pressed
     Check_F1:
@@ -12,7 +12,7 @@ SoundInputProcessing MACRO Choice
         
         lea si,connectedSound
         mov ch,00h
-        mov cl, 2                   ;number of notes
+        mov cl, 3                   ;number of notes
     
     JMP Sound_Playing
     ;==========================
@@ -22,33 +22,21 @@ SoundInputProcessing MACRO Choice
         cmp Choice, F2_ScanCode  
         jne Check_F3
         
-        lea si,sendSound
+        lea si,notificationSound
         mov ch,00h
         mov cl, 2                   ;number of notes
         
     JMP Sound_Playing
     ;==========================
-    
+
     ;Check if F3 is pressed
     Check_F3:
         cmp Choice, F3_ScanCode  
-        jne Check_F4
-        
-        lea si,receiveSound
-        mov ch,00h
-        mov cl, 2                   ;number of notes
-        
-    JMP Sound_Playing
-    ;==========================
-    
-    ;Check if F4 is pressed
-    Check_F4:
-        cmp Choice, F4_ScanCode  
         jne Sound_ESC
         
         lea si,disconnectedSound
         mov ch,00h
-        mov cl, 2                   ;number of notes
+        mov cl, 3                   ;number of notes
 
     JMP Sound_Playing 
     ;==========================        
@@ -89,8 +77,7 @@ INCLUDE code\Speaker.asm
 ;Public variables and procedures
 PUBLIC SoundPlayer
 PUBLIC connectedSound
-PUBLIC sendSound
-PUBLIC receiveSound
+PUBLIC notificationSound
 PUBLIC disconnectedSound
 PUBLIC delay1
 PUBLIC delay2
@@ -120,9 +107,8 @@ SoundTitleChar          DB      4H
 SoundWelcome			DB		'Welcome to Our Sound Player: $'
 SoundOptMsg			    DB		'Please choose an option to play: $'
 SoundChatMenu1			DB		'[F1]	Connected Sound $'
-SoundChatMenu2			DB		'[F2]	Send Sound $'
-SoundChatMenu3			DB		'[F3]	Receive Sound $'
-SoundChatMenu4			DB		'[F4]	Disconnected Sound $'
+SoundChatMenu2			DB		'[F2]	Notification Sound $'
+SoundChatMenu3			DB		'[F3]	Disconnected Sound $'
 ExitSound				DB		'[ESC]	To Exit Sound Player$'
 
 
@@ -136,10 +122,9 @@ ExitSound				DB		'[ESC]	To Exit Sound Player$'
     SoundExit           DB      0   ;1 = exit
     
     ;The notes of the sound
-    connectedSound      DW      460, 380
-    sendSound           DW      1020, 240
-    receiveSound        DW      846, 551
-    disconnectedSound   DW      324, 119
+    connectedSound      DW      460, 380, 475
+    notificationSound   DW      1020, 240
+    disconnectedSound   DW      324, 475, 234
 
 .code
 ;================================================================================================
@@ -477,8 +462,6 @@ SoundPlayerScreen PROC
 	DisplayStr SoundChatMenu2
 	SetCursorPos SoundMsgStartAtMarginX, SoundMsgStartAtMarginY+5, CurrentPage
 	DisplayStr SoundChatMenu3
-	SetCursorPos SoundMsgStartAtMarginX, SoundMsgStartAtMarginY+6, CurrentPage
-	DisplayStr SoundChatMenu4
 	SetCursorPos SoundMsgStartAtMarginX, SoundMsgStartAtMarginY+8, CurrentPage
 	DisplayStr ExitSound
     
