@@ -1,68 +1,90 @@
-;BACS 1024 - Hardware to Hardware Communication (Main)
-;procedure to carry out for input process
+					;BACS 1024 - Hardware to Hardware Communication (Main)
+								;Main Module - BACS 1024
+;===============================================================================================
+;Procedure to carry out for Input Process
+;===============================================================================================
 InputProcessing MACRO Char, User
-	LOCAL Chat_Checking, Sound_Checking, Sound_start, Chatting_Start, Quit_Checking, Quit, Reset, Return
+	LOCAL Chat_Checking, Sound_Checking, Game_Checking, Sound_start, Chatting_Start, Game_start, Quit_Checking, Quit, Reset, Return
 
 	;Check F1 input
-	Chat_Checking:
-    	CMP Char, F1_ScanCode       ;check whether F1 pressed
-    	JNE Sound_Checking
+		Chat_Checking:
+    		CMP Char, F1_ScanCode       ;check whether F1 pressed
+    		JNE Sound_Checking
     
-    	MOV AL, ChatInvitation
-    	OR AL, User                 ;0001(1) OR 0010(2) = 0011(3)
-    	CMP AL, 3					;Only equals 3 when other user accept the invitation
-    	JE	Chatting_Start
+    		MOV AL, ChatInvitation
+    		OR AL, User                 ;0001(1) OR 0010(2) = 0011(3)
+    		CMP AL, 3					;Only equals 3 when other user accept the invitation
+    		JE	Chatting_Start
     
-    	MOV ChatInvitation, User    ;mov 1 to ChatInvitation and wait for another COM
-    	CALL SelectionScreen        ;Refresh the main menu, to show message in notibar for the chat
-    	RET
+    		MOV ChatInvitation, User    ;mov 1 to ChatInvitation and wait for another COM
+    		CALL SelectionScreen        ;Refresh the main menu, to show message in notibar for the chat
+    		RET
     
-    	Chatting_Start:
-        	CALL ReadyToChat
-        	MOV ChatInvitation, 0   ;reset chat invitation
-        	CALL SelectionScreen    
-	RET
-	;========================
+    		Chatting_Start:
+        		CALL ReadyToChat
+        		MOV ChatInvitation, 0   ;reset chat invitation
+        		CALL SelectionScreen    
+		RET
+	;===============================================================================================
     
     ;Check F2 input
-	Sound_Checking:
-    	CMP Char, F2_ScanCode       ;check whether F2 pressed
-    	JNE Quit_Checking
+		Sound_Checking:
+    		CMP Char, F2_ScanCode       ;check whether F2 pressed
+    		JNE Game_checking
         
-        ;only user 1 can access the sound player
-        MOV AL, User                  
-        CMP AL, 1
-        JE Sound_start
+			;only user 1 can access the sound player
+				MOV AL, User                  
+				CMP AL, 1
+				JE Sound_start
         
-        CALL SelectionScreen        ;Refresh the main menu, to show message in notibar for the chat
-    	RET
+				CALL SelectionScreen        ;Refresh the main menu, to show message in notibar for the chat
+    			RET
 
-        Sound_start:
-        	CALL SoundPlayer
-        	CALL SelectionScreen     
-	RET
-	;========================
+			Sound_start:
+        		CALL SoundPlayer
+        		CALL SelectionScreen     
+		RET
+	;===============================================================================================
     
+	;Check F3 input
+		Game_checking:
+			CMP Char, F3_ScanCode       ;check whether F3 pressed
+    		JNE Quit_Checking
+        
+		    ;only user 1 can access the sound player
+				MOV AL, User                  
+				CMP AL, 1
+				JE Game_start
+        
+				CALL SelectionScreen        ;Refresh the main menu, to show message in notibar for the chat
+    			RET
+
+			Game_start:
+				CALL ReadyToGame
+				CALL SelectionScreen     
+
+		RET
+	;===============================================================================================
 	;Check ESC input
-	Quit_Checking:
-    	CMP Char, ESC_ScanCode
-    	JNE Return					;Go to end of this macro
+		Quit_Checking:
+    		CMP Char, ESC_ScanCode
+    		JNE Return					;Go to end of this macro
     
-    	MOV AL,User
-    	CMP AL,1
-    	JNE Reset
+    		MOV AL,User
+    		CMP AL,1
+    		JNE Reset
 
-	Quit:						    ;Back to the system
+		Quit:						    ;Back to the system
     	
-    	;Play disconnected sound
-	    lea si, disconnectedSound
-    	mov ch,00h
-        mov cl, 3
-        call PlaySound
+    		;Play disconnected sound
+				lea si, disconnectedSound
+    			mov ch,00h
+				mov cl, 3
+				call PlaySound
     	
-    	MOV AX, 4C00H
-    	INT 21H
-    	RET
+    			MOV AX, 4C00H
+    			INT 21H
+    			RET
 
 	Reset:
     	MOV ChatInvitation, 0
@@ -70,7 +92,7 @@ InputProcessing MACRO Char, User
     	
     	CALL WaitOtherUser
     	CALL SelectionScreen
-	;==================================
+	;===============================================================================================
 
 	Return:
 	
@@ -91,13 +113,14 @@ PUBLIC UserNameSize2, UserName2
 ;External variables (access the PUBLIC of chat and sound) - Name: type
 EXTRN ReadyToChat: FAR
 EXTRN SoundPlayer: FAR
+EXTRN ReadyToGame: FAR
 EXTRN connectedSound: WORD
 EXTRN disconnectedSound: WORD
 EXTRN delay1: WORD
 EXTRN delay2: WORD
-;======================================================================================
+;===============================================================================================
 								;Start of Main Module
-;======================================================================================
+;===============================================================================================
 
 .MODEL SMALL
 .STACK 100
@@ -106,7 +129,7 @@ EXTRN delay2: WORD
 ;Set for Screen Output Display
 
 ;Logo Design + Input Message Coordinate
-;======================================
+;===============================================================================================
 SysLogoX			EQU		12
 SysLogoY			EQU		5
 SysLogoWidth		EQU		57
@@ -114,14 +137,14 @@ SysLogoHeight		EQU		7
 SysLogoColor		EQU		1EH
 MsgStartAtMarginX	EQU		SysLogoX
 MsgStartAtMarginY	EQU		SysLogoY+SysLogoHeight+1
-;===============================================================================
+;===============================================================================================
 
 ;System Title Design
-;====================
+;===============================================================================================
 SysTitleChar	DB		4H
 
 ;Notice Bar for invitation
-;=========================
+;===============================================================================================
 SysInvBarStartAtMarginX    EQU     0
 SysInvBarStartAtMarginY    EQU     WindowHeight-SysInvBarHeight
 SysInvBarWidth             EQU     WindowWidth-SysInvBarStartAtMarginX*2
@@ -129,10 +152,10 @@ SysInvBarHeight            EQU     4
 SysInvBarBorderWidth       EQU     1
 SysInvBarColor             EQU     3D
 SysInvBarChar              DB      '-'
-;===============================================================================
+;===============================================================================================
 
 ;System Message and String
-;=========================
+;===============================================================================================
 SysEntry				DB		'Please Enter Your Username => $'
 SysEntryMsg				DB		'**Max Length 15 Characters and Start with a Letter** $'
 SysContinueMsg			DB		'Press any key to continue...$'
@@ -142,24 +165,25 @@ SysConnectMsg			DB		'Congratulations! You are connected with $'
 OptMsg					DB		'Please choose an option to continue: $'
 SysChatMenu				DB		'[F1]	To Start Chatting$'
 SysSoundMenu			DB		'[F2]	To Sound Player$'
+SysGameMenu				DB		'[F3]	To Start Game$'
 ExitSys					DB		'[ESC]	To Exit System$'
 ChatInvitation			DB		0 ;set default value for invitations
 SendChatInvitation		DB		'You have sent a chat invitation to $'
 ReceivedChatInvitation	DB		'Press [F1] to accept chat invitation from $'
 SysErrorMsg				DB		'Invalid Data Detected!!! Please Enter Again... $'
-;============================================================================================
+;===============================================================================================
 
 ;Username Var
 UserNameSize1	DB	MaxUserNameSize, ?
 UserName1		DB	MaxUserNameSize dup('$'),'$'
 UserNameSize2	DB	MaxUserNameSize, ?
 UserName2		DB	MaxUserNameSize dup('$'),'$'
-;===================================================
+;===============================================================================================
 
 ;Serial Communication var
 MainSentChar		DB	?
 MainReceivedChar	DB	?
-;==========================
+;===============================================================================================
 
 .CODE
 MAIN PROC FAR
@@ -167,96 +191,96 @@ MAIN PROC FAR
 	MOV DS,AX
 
 	;Call macro in Port.asm
-	InitSerialPort
+		InitSerialPort
 
-	CALL GetUserName
-	CALL WaitOtherUser
-	CALL SelectionScreen
+		CALL GetUserName
+		CALL WaitOtherUser
+		CALL SelectionScreen
 	
 	;Play connected sound
-	lea si, connectedSound
-	mov ch,00h
-    mov cl, 3
-    call PlaySound
+		lea si, connectedSound
+		mov ch,00h
+		mov cl, 3
+		call PlaySound
     
 	Loop_In_Main:
 
     	;Get Primary User input and send to Second User
-    	Send_In_Main:
-        	GetKeyPressAndFlush         ;get key press
-        	JZ Receive_In_Main          ;skip if not key pressed
+    		Send_In_Main:
+        		GetKeyPressAndFlush         ;get key press
+        		JZ Receive_In_Main          ;skip if not key pressed
         	
-        	MOV MainSentChar, AH
-        	SendCharTo MainSentChar     ;send char(signal) to another COM
-        	CALL PrimaryUserInput       ;Process for send
+        		MOV MainSentChar, AH
+        		SendCharTo MainSentChar     ;send char(signal) to another COM
+        		CALL PrimaryUserInput       ;Process for send
         
         ;Get Second User input
-    	Receive_In_Main:
-        	ReceiveCharFrom             ;check whether got receive char from COM or not
-        	JZ Loop_In_Main             ;skip if not char received
+    		Receive_In_Main:
+        		ReceiveCharFrom             ;check whether got receive char from COM or not
+        		JZ Loop_In_Main             ;skip if not char received
         	
-        	MOV MainReceivedChar, AL
-        	CALL SecondaryUserInput     ;Process fo receive
+        		MOV MainReceivedChar, AL
+        		CALL SecondaryUserInput     ;Process fo receive
 
-	JMP Loop_In_Main
+		JMP Loop_In_Main
 	
 MAIN ENDP
-;=======================================================================
+;===============================================================================================
 
 ;Get user name
 GetUserName PROC
 
 	;Draw System Logo
-	CALL DrawSysLogo
-	JMP UserName_Display
+		CALL DrawSysLogo
+		JMP UserName_Display
     
     ;Check for error
-	Input_Error_Detected:
-        CALL DrawSysLogo
-        SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+3, CurrentPage
-        DisplayStr SysErrorMsg
+		Input_Error_Detected:
+			CALL DrawSysLogo
+			SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+3, CurrentPage
+			DisplayStr SysErrorMsg
 
 
-	UserName_Display:
-    	;Set cursor position from Graphics.asm for display message
-    	;Current Page value read from Consts.asm
+		UserName_Display:
+    		;Set cursor position from Graphics.asm for display message
+    		;Current Page value read from Consts.asm
     
-    	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY, CurrentPage
-    	DisplayStr SysEntryMsg
+    			SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY, CurrentPage
+    			DisplayStr SysEntryMsg
     
-    	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+1, CurrentPage
-    	DisplayStr SysEntry
+    			SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+1, CurrentPage
+    			DisplayStr SysEntry
     
-    	;Clear Username (to update the latest name)
-    	MOV BX,0
-    	Clear_UserName:
-        	MOV UserName1[BX], '$'
-        	INC BX
-        	CMP BX,MaxUserNameSize
-        	JLE Clear_UserName
+    		;Clear Username (to update the latest name)
+    			MOV BX,0
+    			Clear_UserName:
+        			MOV UserName1[BX], '$'
+        			INC BX
+        			CMP BX,MaxUserNameSize
+        			JLE Clear_UserName
     
-    	;read user input and store into username1
-    	ReadStr UserNameSize1
+    		;read user input and store into username1
+    			ReadStr UserNameSize1
     
-    	;Validate user input (first character must be 'A' - 'z')
-    	CMP UserName1[0], 'A'
-        JB  Input_Error_Detected		;jump if below than 'A'
-        CMP UserName1[0], 'Z'
-        JBE UserName_Return		        ;jump if below or equal to 'Z'
+    		;Validate user input (first character must be 'A' - 'z')
+    			CMP UserName1[0], 'A'
+				JB  Input_Error_Detected		;jump if below than 'A'
+				CMP UserName1[0], 'Z'
+				JBE UserName_Return		        ;jump if below or equal to 'Z'
     
-        CMP UserName1[0], 'a'
-        JB  Input_Error_Detected        ;jump if below than 'a'
-        CMP UserName1[0], 'z'
-        JA  Input_Error_Detected		;jump if above than 'z'
+				 CMP UserName1[0], 'a'
+				 JB  Input_Error_Detected        ;jump if below than 'a'
+				 CMP UserName1[0], 'z'
+				 JA  Input_Error_Detected		;jump if above than 'z'
 
-	UserName_Return:
-    	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+4, CurrentPage
-        DisplayStr SysContinueMsg       ;Press key to continue
-        TransferKeyPress
+		UserName_Return:
+    		SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+4, CurrentPage
+			DisplayStr SysContinueMsg       ;Press key to continue
+			TransferKeyPress
         
     RET
 GetUserName ENDP
-;=====================================================================
+;===============================================================================================
 
 ;Handle Connection for other user to connect and set username2 if connected
 WaitOtherUser PROC
@@ -264,16 +288,16 @@ WaitOtherUser PROC
 	CALL DrawSysLogo
 
 	;Print Message
-	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+3, CurrentPage
-	DisplayStr SysWaitingMsg
+		SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+3, CurrentPage
+		DisplayStr SysWaitingMsg
     
-    SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+4, CurrentPage
-    DisplayStr ExitSys
+		SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+4, CurrentPage
+		DisplayStr ExitSys
     
 	;Hide the cursor some where in the screen (nothing to enter and display)
-    SetCursorPos WindowWidth, WindowHeight, 0
+		SetCursorPos WindowWidth, WindowHeight, 0
 
-	MOV BX,1    ;BX=0001h
+		MOV BX,1    ;BX=0001h
 
 	Send_UserName:
     	MOV CL, UserNameSize1[BX]       ;first character of username1
@@ -306,7 +330,7 @@ WaitOtherUser PROC
 
 	RET
 WaitOtherUser ENDP
-;========================================================================
+;===============================================================================================
 ;Play sound
 PlaySound PROC
 
@@ -314,7 +338,8 @@ PlaySound PROC
 	RET
 
 PlaySound ENDP
-;========================================================================
+;===============================================================================================
+
 ;Process Primary User Input
 PrimaryUserInput PROC
     
@@ -322,7 +347,7 @@ PrimaryUserInput PROC
 	RET
 	
 PrimaryUserInput ENDP
-;========================================================================
+;===============================================================================================
 
 ;Process Secondary User Input
 SecondaryUserInput PROC
@@ -331,7 +356,7 @@ SecondaryUserInput PROC
 	RET
 	
 SecondaryUserInput ENDP
-;========================================================================
+;===============================================================================================
 
 ;Clear System Screen and Draw system Logo
 DrawSysLogo PROC
@@ -685,7 +710,7 @@ DrawSysLogo PROC
 	RET
 	
 DrawSysLogo ENDP
-;======================================================================================================
+;===============================================================================================
 
 ;Display Selection for user to choose
 SelectionScreen PROC
@@ -704,10 +729,12 @@ SelectionScreen PROC
     ;Print InvitationBar's message
 	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+3, CurrentPage
 	DisplayStr OptMsg
-	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+5, CurrentPage
+	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+4, CurrentPage
 	DisplayStr SysChatMenu
-	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+6, CurrentPage
+	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+5, CurrentPage
 	DisplayStr SysSoundMenu
+	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+6, CurrentPage
+	DisplayStr SysGameMenu
 	SetCursorPos MsgStartAtMarginX, MsgStartAtMarginY+7, CurrentPage
 	DisplayStr ExitSys
 
@@ -716,7 +743,7 @@ SelectionScreen PROC
 
 	RET
 SelectionScreen ENDP
-;==============================================================================
+;===============================================================================================
 
 DrawInvitationBar PROC
 
