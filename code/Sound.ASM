@@ -3,7 +3,7 @@
                                 ;MACRO
 ;===============================================================================================
 SoundInputProcessing MACRO Choice
-    Local Check_F1, Check_F2, Check_F3, Sound_ESC, Sound_Playing, Return
+    Local Check_F1, Check_F2, Check_F3, Check_F4, Sound_ESC, Sound_Playing, Return
 
     ;Check if F1 is pressed
     Check_F1:
@@ -32,7 +32,7 @@ SoundInputProcessing MACRO Choice
     ;Check if F3 is pressed
     Check_F3:
         cmp Choice, F3_ScanCode  
-        jne Sound_ESC
+        jne Check_F4
         
         lea si,disconnectedSound
         mov ch,00h
@@ -40,6 +40,16 @@ SoundInputProcessing MACRO Choice
 
     JMP Sound_Playing 
     ;==========================        
+    
+    ;Check if F4 is pressed
+    Check_F4:
+        cmp Choice, F4_ScanCode  
+        jne Sound_ESC
+        
+        call SoundSet
+
+    JMP Return 
+    ;==========================
     
     ;Check if ESC is pressed
     Sound_ESC:
@@ -58,11 +68,11 @@ SoundInputProcessing MACRO Choice
 
         ;Play sound
         SoundPlay
-
+        
         call SoundPlayerScreen          ;refresh sound player screen
         
     Return:    
-
+ 
 ENDM SoundInputProcessing 
 ;===============================================================================================
                                 ;START OF SOUND MODULE
@@ -84,6 +94,7 @@ PUBLIC delay2
 
 ;External variables and procedures
 EXTRN UserName1:BYTE
+EXTRN SoundSet: FAR
 ;===============================================================
 
 .model small
@@ -109,6 +120,7 @@ SoundOptMsg			    DB		'Please choose an option to play: $'
 SoundChatMenu1			DB		'[F1]	Connected Sound $'
 SoundChatMenu2			DB		'[F2]	Notification Sound $'
 SoundChatMenu3			DB		'[F3]	Disconnected Sound $'
+SoundChatSetting	    DB		'[F4]	Sound Setting $'
 ExitSound				DB		'[ESC]	To Exit Sound Player$'
 
 
@@ -462,6 +474,8 @@ SoundPlayerScreen PROC
 	DisplayStr SoundChatMenu2
 	SetCursorPos SoundMsgStartAtMarginX, SoundMsgStartAtMarginY+5, CurrentPage
 	DisplayStr SoundChatMenu3
+	SetCursorPos SoundMsgStartAtMarginX, SoundMsgStartAtMarginY+6, CurrentPage
+	DisplayStr SoundChatSetting
 	SetCursorPos SoundMsgStartAtMarginX, SoundMsgStartAtMarginY+8, CurrentPage
 	DisplayStr ExitSound
     
