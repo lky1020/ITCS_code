@@ -260,11 +260,14 @@ ReadyToChat PROC FAR
                 GetKeyPressAndFlush
                 JZ Chat_Receive                 ;Skip processing user input if no key is pressed
         
-                MOV ChatSentChar, AL
-                CMP AL,Back_AsciiCode 
+                MOV  ChatSentChar, AL
+                CMP  AL,Back_AsciiCode 
                 JNE  ContinueProcess
          
              ;Decrease the Index and insert $ to replace the variables enter
+                CMP UserMsgIndex, 0
+                JE  Chat_Receive
+
                 DEC UserMsgIndex
                 MOV BH, 0h
                 MOV BL, UserMsgIndex

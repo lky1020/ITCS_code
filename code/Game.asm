@@ -486,7 +486,7 @@ BalloonMenu proc
 		;Set Position for the '-'
 		MOV 	AH, 02H
 		MOV 	BH, 0
-		MOV 	DX, 1528H
+		MOV 	DX, 1513H
 		INT 	10H
 
 		;Store cursor position
@@ -503,7 +503,7 @@ BalloonMenu proc
 		;Initialize Cursor Position
 		MOV 	AH, 02H
 		MOV 	BH, 0
-		MOV 	DX, 0028H
+		MOV 	DX, 0013H
 		INT 	10H
 
 		;Store cursor position
@@ -524,10 +524,10 @@ BalloonMenu proc
 			INT 	21H
 		Loop BOX1
 	
-		;Initialize Cursor Position
+		;Initialize Cursor Position ;004DH
 		MOV 	AH, 02H
 		MOV 	BH, 0
-		MOV 	DX, 004DH
+		MOV 	DX, 0038H
 		INT 	10H
 
 		;Store cursor position
@@ -552,7 +552,7 @@ BalloonMenu proc
 		;Initialize Cursor Position
 		MOV 	AH, 02H
 		MOV 	BH, 0
-		MOV 	DX, 0329H
+		MOV 	DX, 0314H
 		INC 	DH
 		INT 	10H
 	
@@ -561,7 +561,7 @@ BalloonMenu proc
 		;Initialize Cursor Position
 		MOV 	AH, 02H
 		MOV 	BH, 0
-		MOV 	DX, 0429H
+		MOV 	DX, 0414H
 		INC 	DH
 		INT 	10H
 	
@@ -571,7 +571,7 @@ BalloonMenu proc
 		;Initialize Cursor Position
 		MOV 	AH, 02H
 		MOV 	BH, 0
-		MOV 	DX, 0529H
+		MOV 	DX, 0514H
 		INC 	DH
 		INT 	10H
 		
@@ -580,7 +580,7 @@ BalloonMenu proc
 		;Initialize Cursor Position
 		MOV 	AH, 02H
 		MOV 	BH, 0
-		MOV 	DX, 0629H
+		MOV 	DX, 0614H
 		INC 	DH
 		INT 	10H
 		
@@ -589,7 +589,7 @@ BalloonMenu proc
 		;Initialize Cursor Position
 		MOV 	AH, 02H
 		MOV 	BH, 0
-		MOV 	DX, 0729H
+		MOV 	DX, 0714H
 		INC 	DH
 		INT 	10H
 		
@@ -598,7 +598,7 @@ BalloonMenu proc
 		;Initialize Cursor Position
 		MOV 	AH, 02H
 		MOV 	BH, 0
-		MOV 	DX, 0829H
+		MOV 	DX, 0814H
 		INC 	DH
 		INT 	10H
 		
@@ -607,7 +607,7 @@ BalloonMenu proc
 		;Initialize Cursor Position
 		MOV 	AH, 02H
 		MOV 	BH, 0
-		MOV 	DX, 0929H
+		MOV 	DX, 0914H
 		INC 	DH
 		INT 	10H
 		
@@ -620,7 +620,7 @@ BalloonMenu proc
 		;Initialize Cursor Position
 		MOV 	AH, 02H
 		MOV 	BH, 0
-		MOV 	DX, 1729H
+		MOV 	DX, 1714H
 		INT 	10H
 		
 		DisplayStr P_Score
@@ -628,7 +628,7 @@ BalloonMenu proc
 		;Initialize Cursor Position
 		MOV 	AH, 02H
 		MOV 	BH, 0
-		MOV 	DX, 1744H
+		MOV 	DX, 1729H
 		INT 	10H
 		
 		DisplayStr P_Arrow
@@ -636,13 +636,14 @@ BalloonMenu proc
 		;Initialize Cursor Position
 		MOV 	AH, 02H
 		MOV 	BH, 0
-		MOV 	DX, 143CH
+		MOV 	DX, 1427H
 		INT 	10H
 
 		;Store cursor position
 		MOV 	setCursor, DX  ; 184f
 		
 		DisplayStr G_Arrow
+
 		JMP		KeyboardInput
 
 	KeyboardInput:
@@ -656,7 +657,7 @@ BalloonMenu proc
 		;Initialize Cursor Position
 		MOV 	AH, 02H
 		MOV 	BH, 0
-		MOV 	DX, 174AH
+		MOV 	DX, 1730H
 		INT 	10H
 	
 		MOV 	DX, 0
@@ -670,10 +671,11 @@ BalloonMenu proc
 		;Initialize Cursor Position
 		MOV 	AH, 02H
 		MOV 	BH, 0
-		MOV 	DX, 1730H
+		MOV 	DX, 171AH
 		INT 	10H
 
 
+		;Display and Calculate Score (2 digits)
 		MOV 	AX, Score
 	
 		MOV		CL,10		;store 10 into CL
@@ -698,7 +700,7 @@ BalloonMenu proc
 		MOV 	AH, 08H
 		INT 	21H
 		
-		CMP 	setCursor, 1428H
+		CMP 	setCursor, 1414H
 		JG  	inputA
 		CMP 	setCursor, 144FH
 		JL 		inputD
@@ -708,6 +710,7 @@ BalloonMenu proc
 		CMP 	AL, 4BH
 		JNE 	inputD
 		
+		;Replace the Arrow with Space
 		MOV 	AH, 02H
 		MOV 	BH, 0
 		MOV 	DX, setCursor   ;184e
@@ -715,6 +718,7 @@ BalloonMenu proc
 		
 		DisplayStr Space
 	
+		;Print a new Arrow  at the cursor position
 		MOV 	CX, setCursor
 		SUB 	setCursor, 1H
 		SUB 	CL, 1H
@@ -732,8 +736,9 @@ BalloonMenu proc
 		JMP 	quit
 	
 	inputD:
-		CMP 	setCursor, 144FH
+		CMP 	setCursor, 1438H
 		JE		quit1
+
 		CMP 	AL, 4DH
 		JNE 	inputSpace
 		
@@ -770,13 +775,12 @@ BalloonMenu proc
 
 		MOV 	CX, setCursor
 		MOV 	setCursorArrow, CX
-		JMP 	loopSpace
-	
-
+		
 	loopSpace:
 		MOV 	CX, setCursorArrow	 ; 18++
 		SUB 	CH, 1h ; 17++
 		MOV 	setCursorArrow, CX   ; 17++
+
 		MOV 	AH, 02h
 		MOV 	BH, 0
 		MOV 	DX, CX   			;setCursorArrow 17++h
