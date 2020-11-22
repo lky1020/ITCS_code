@@ -84,6 +84,8 @@ EXTRN UserName1:BYTE
 EXTRN connectedSound:WORD
 EXTRN notificationSound:WORD
 EXTRN disconnectedSound:WORD
+EXTRN delay1:WORD
+EXTRN delay2:WORD
 EXTRN connectedSoundNote:BYTE  
 EXTRN notificationSoundNote:BYTE
 EXTRN disconnectedSoundNote:BYTE
@@ -536,6 +538,13 @@ DisplayCurrentSoundSetting ENDP
 ;Change to sound set 1
 SoundSet1 PROC
     
+    ;Change sound delay
+    mov ax, 7000h
+    mov delay1, ax
+    
+    mov ax, 0150h
+    mov delay2, ax
+    
     ;change connected sound
     lea si, connectedSound
     lea di, soundSet1Array1
@@ -587,6 +596,12 @@ SoundSet1 ENDP
 ;Change to sound set 2
 SoundSet2 PROC
     
+    mov ax, 5000h
+    mov delay1, ax
+    
+    mov ax, 0100h
+    mov delay2, ax
+    
     ;change connected sound
     lea si, connectedSound
     lea di, soundSet2Array1
@@ -637,6 +652,12 @@ SoundSet2 ENDP
 ;-------------------------------------------------------------------------
 ;Change to sound set 3
 SoundSet3 PROC
+    
+    mov ax, 8000h
+    mov delay1, ax
+    
+    mov ax, 0250h
+    mov delay2, ax
     
     ;change connected sound
     lea si, connectedSound
