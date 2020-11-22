@@ -46,8 +46,9 @@ SoundInputProcessing MACRO Choice
         cmp Choice, F4_ScanCode  
         jne Sound_ESC
         
-        call SoundSet
-
+        call SoundSetting
+        call SoundPlayerScreen          ;refresh sound player screen
+        
     JMP Return 
     ;==========================
     
@@ -60,7 +61,7 @@ SoundInputProcessing MACRO Choice
         mov al, 1
         mov SoundExit,al 
     
-    call SoundPlayerScreen      ;refresh sound player screen    
+    call SoundPlayerScreen              ;refresh sound player screen    
     RET
     ;==========================
     
@@ -81,7 +82,6 @@ ENDM SoundInputProcessing
 INCLUDE code\Consts.asm
 INCLUDE code\Graphics.asm
 INCLUDE code\Keyboard.asm
-INCLUDE code\Port.asm
 INCLUDE code\Speaker.asm
 
 ;Public variables and procedures
@@ -91,10 +91,14 @@ PUBLIC notificationSound
 PUBLIC disconnectedSound
 PUBLIC delay1
 PUBLIC delay2
+PUBLIC connectedSoundNote   
+PUBLIC notificationSoundNote
+PUBLIC disconnectedSoundNote
+
 
 ;External variables and procedures
 EXTRN UserName1:BYTE
-EXTRN SoundSet: FAR
+EXTRN SoundSetting: FAR
 ;===============================================================
 
 .model small
@@ -102,41 +106,46 @@ EXTRN SoundSet: FAR
 .data
 ;Logo Design + Input Message Coordinate
 ;======================================
-SoundLogoX			    EQU		12
-SoundLogoY			    EQU		5
-SoundLogoWidth		    EQU		57
-SoundLogoHeight		    EQU		7
-SoundLogoColor		    EQU		3EH
-SoundMsgStartAtMarginX	EQU		SoundLogoX
-SoundMsgStartAtMarginY	EQU		SoundLogoY + SoundLogoHeight + 1
+SoundLogoX			        EQU		12
+SoundLogoY			        EQU		5
+SoundLogoWidth		        EQU		57
+SoundLogoHeight		        EQU		7
+SoundLogoColor		        EQU		3EH
+SoundMsgStartAtMarginX	    EQU		SoundLogoX
+SoundMsgStartAtMarginY	    EQU		SoundLogoY + SoundLogoHeight + 1
 ;===============================================================================
 
     
 ;System Message and String
 ;=========================
-SoundTitleChar          DB      4H
-SoundWelcome			DB		'Welcome to Our Sound Player: $'
-SoundOptMsg			    DB		'Please choose an option to play: $'
-SoundChatMenu1			DB		'[F1]	Connected Sound $'
-SoundChatMenu2			DB		'[F2]	Notification Sound $'
-SoundChatMenu3			DB		'[F3]	Disconnected Sound $'
-SoundChatSetting	    DB		'[F4]	Sound Setting $'
-ExitSound				DB		'[ESC]	To Exit Sound Player$'
+SoundTitleChar              DB      4H
+SoundWelcome			    DB		'Welcome to Our Sound Player: $'
+SoundOptMsg			        DB		'Please choose an option to play: $'
+SoundChatMenu1			    DB		'[F1]	Connected Sound $'
+SoundChatMenu2			    DB		'[F2]	Notification Sound $'
+SoundChatMenu3			    DB		'[F3]	Disconnected Sound $'
+SoundChatSetting	        DB		'[F4]	Sound Setting $'
+ExitSound				    DB		'[ESC]	To Exit Sound Player$'
 
 
 ;Sound Data
     ;sound variable 
-    delay1              DW      7000h            ;used to delay the notes
-    delay2              DW      0150h
+    delay1                  DW      7000h            ;used to delay the notes
+    delay2                  DW      0150h
     
     ;Data
-    SoundChoice         DB      ?   
-    SoundExit           DB      0   ;1 = exit
+    SoundChoice             DB      ?   
+    SoundExit               DB      0   ;1 = exit
     
     ;The notes of the sound
-    connectedSound      DW      460, 380, 475
-    notificationSound   DW      1020, 240
-    disconnectedSound   DW      324, 475, 234
+    connectedSound          DW      460, 380, 475
+    notificationSound       DW      1020, 240
+    disconnectedSound       DW      324, 475, 234
+    
+    ;length of note
+    connectedSoundNote      DB      3
+    notificationSoundNote   DB      2
+    disconnectedSoundNote   DB      3
 
 .code
 ;================================================================================================
@@ -159,7 +168,7 @@ SoundPlayer PROC FAR
         
         ;check whether user want to Exit sound player
         mov al, soundExit
-        cmp al, 1           ;1 = exit
+        cmp al, 1                   ;1 = exit
         je SoundPlayer_Exit 
     
     JMP Loop_In_Sound

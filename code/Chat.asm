@@ -202,6 +202,7 @@ EXTRN UserName2:BYTE
 EXTRN notificationSound: WORD
 EXTRN delay1: WORD
 EXTRN delay2: WORD
+EXTRN notificationSoundNote: BYTE
 ;================================================================================================
 
 .MODEL SMALL
@@ -387,7 +388,7 @@ PlayNotificationSound PROC
     ;Play send sound
 	lea si, notificationSound
 	mov ch,00h
-    mov cl, 2
+    mov cl, notificationSoundNote
     CALL ProcessSound
 	RET
 	

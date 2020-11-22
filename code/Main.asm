@@ -79,7 +79,7 @@ InputProcessing MACRO Char, User
     		;Play disconnected sound
 				lea si, disconnectedSound
     			mov ch,00h
-				mov cl, 3
+				mov cl, disconnectedSoundNote
 				call PlaySound
     	
     			MOV AX, 4C00H
@@ -118,6 +118,8 @@ EXTRN connectedSound: WORD
 EXTRN disconnectedSound: WORD
 EXTRN delay1: WORD
 EXTRN delay2: WORD
+EXTRN connectedSoundNote: BYTE
+EXTRN disconnectedSoundNote: BYTE
 ;===============================================================================================
 								;Start of Main Module
 ;===============================================================================================
@@ -200,7 +202,7 @@ MAIN PROC FAR
 	;Play connected sound
 		lea si, connectedSound
 		mov ch,00h
-		mov cl, 3
+		mov cl, connectedSoundNote
 		call PlaySound
     
 	Loop_In_Main:
