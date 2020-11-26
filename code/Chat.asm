@@ -57,7 +57,7 @@ ENDM DrawInfoBar
 ;X,Y = The Cursor of the User
 ;OffsetY = The Chat Box Height of the User
 ProcessInput MACRO Char, X, Y, OffsetY, User       
-    LOCAL CheckEscape, CheckEnter, CheckBackspace, CheckPrintable, AdjustCursorPos, Return   
+    LOCAL CheckEscape, CheckEnter, CheckBackspace, CheckPrintable, PrintChar, AdjustCursorPos, Return   
     
     ;Check if ESC is pressed
         CheckEscape:
@@ -101,15 +101,25 @@ ProcessInput MACRO Char, X, Y, OffsetY, User
        RET
     ;==================================
 
-    ;Check if printable character is pressed (NEED TO REMOVE)
+    ;Check if printable character is pressed
         CheckPrintable:
-            ;CMP Char, ' '   ;Compare with lowest printable ascii value
-            ;JB Return
-            ;CMP Char, '~'   ;Compare with highest printable ascii value
-            ;JA Return
+            CMP Char, 1H   ;emoji
+            JE PrintChar 
+            
+            CMP Char, 2H   ;emoji
+            JE PrintChar 
+            
+            CMP Char, 3H   ;emoji
+            JE PrintChar 
+            
+            CMP Char, ' '   ;Compare with lowest printable ascii value
+            JB Return
+            CMP Char, '~'   ;Compare with highest printable ascii value
+            JA Return
     
 
     ;Print char
+    PrintChar:
         SetCursorPos X, Y, CurrentPage
         DisplayChar Char
     
