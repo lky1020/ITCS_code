@@ -104,7 +104,10 @@ ReadyToGame PROC FAR
 			;===============================================================================================
 
 			Error:
+				MOV AH, 11
+				MOV AL, 40
 				CALL GenerateSound
+				MOV AX,0
 				JMP Start
 
 	Return:
@@ -403,7 +406,7 @@ GenerateSound PROC
 	sound:
 		MOV     AL, 182         ; Prepare the speaker for the note.
 		OUT     43H, AL         ; Output
-		MOV     AX, 3224        ; Frequency number (in decimal)
+		;MOV     AX, ...        ; Frequency number (in decimal) already pass the value into AX before calling 
                                 
 		OUT     42h, AL         ; Output low byte.
 		MOV     AL, AH          ; Output high byte.
@@ -429,8 +432,6 @@ GenerateSound PROC
 		
 		RET
 GenerateSound ENDP
-
-
 ;===============================================================================================
 								;Balloon Menu (Tutorial for user)
 ;===============================================================================================
@@ -456,8 +457,12 @@ BalloonMenu proc
 	JMP Loop_In_BalloonMenu
 
 	Err_Loop_In_BalloonMenu:
+		MOV AH, 11
+		MOV AL, 40
+
 		CALL	GenerateSound
 	
+		MOV AX,0
 		Loop_In_BalloonMenu:
 			CALL BalloonSubMenu
 			MOV AH, 01H
@@ -546,6 +551,7 @@ BalloonMenu proc
 			MOV 	AH, 02H
 			INT 	21H
 		Loop 	BOX2
+
 ;================================================================================================
 								;Balloon Game Template Display
 ;================================================================================================
@@ -565,7 +571,6 @@ BalloonMenu proc
 		INC 	DH
 		INT 	10H
 	
-		
 		DisplayStr balloon1
 		
 		;Initialize Cursor Position
@@ -643,8 +648,6 @@ BalloonMenu proc
 		MOV 	setCursor, DX  ; 184f
 		
 		DisplayStr G_Arrow
-
-		JMP		KeyboardInput
 
 	KeyboardInput:
 		
@@ -771,7 +774,11 @@ BalloonMenu proc
 		JE 		checkScore1
 		SUB 	Arrow, 1H
 		
+		MOV AH, 91
+		MOV AL, 21
 		CALL	GenerateSound
+
+		MOV AX,0
 
 		MOV 	CX, setCursor
 		MOV 	setCursorArrow, CX
@@ -781,16 +788,12 @@ BalloonMenu proc
 		SUB 	CH, 1h ; 17++
 		MOV 	setCursorArrow, CX   ; 17++
 
-		MOV 	AH, 02h
-		MOV 	BH, 0
-		MOV 	DX, CX   			;setCursorArrow 17++h
-		INT 	10H
-		
 		MOV 	AH, 02H
 		MOV 	BH, 0
-		MOV 	DX, setCursorArrow
+		MOV 	DX, setCursorArrow	;setCursorArrow 17++h
 		INT 	10H
 		
+		;Read the character at the cursor position ;BH is = page number
 		MOV 	AH, 08H
 		MOV 	BH, 00
 		INT 	10H
@@ -802,8 +805,11 @@ BalloonMenu proc
 
 		MOV 	SaveChar, al
 		
+		;DI will be the clock ticks
 		MOV 	DI, 1
 		MOV 	AH, 0
+
+		;to get the system time
 		INT 	1AH
 		MOV 	BX, DX
 		
@@ -823,13 +829,6 @@ BalloonMenu proc
 		SUB 	DX, BX
 		CMP 	DI, DX
 		JA 		Delay
-		
-		MOV 	AH, 02H
-		MOV 	BH, 0
-		MOV 	DX, setCursorArrow   ;setCursorArrow 17++h
-	
-		INT 	10H
-		MOV 	checkCursor, DX
 	
 		MOV 	CX, setCursorArrow
 		MOV 	AH, 02h
