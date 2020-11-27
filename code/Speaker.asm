@@ -82,5 +82,5 @@ SoundPlay MACRO
     ;Turn Speaker OFF
     SpeakerOff
             
-ENDM SoundDelay    
+ENDM SoundPlay    
 
