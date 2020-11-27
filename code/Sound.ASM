@@ -10,9 +10,10 @@ SoundInputProcessing MACRO Choice
         cmp Choice, F1_ScanCode  
         jne Check_F2
         
+        ;Initialize connected sound
         lea si,connectedSound
         mov ch,00h
-        mov cl, 3                   ;number of notes
+        mov cl, connectedSoundNote    
     
     JMP Sound_Playing
     ;==========================
@@ -22,9 +23,10 @@ SoundInputProcessing MACRO Choice
         cmp Choice, F2_ScanCode  
         jne Check_F3
         
+        ;Initialize notification sound
         lea si,notificationSound
         mov ch,00h
-        mov cl, 2                   ;number of notes
+        mov cl, notificationSoundNote
         
     JMP Sound_Playing
     ;==========================
@@ -34,9 +36,10 @@ SoundInputProcessing MACRO Choice
         cmp Choice, F3_ScanCode  
         jne Check_F4
         
+        ;Initialize disconnected sound
         lea si,disconnectedSound
         mov ch,00h
-        mov cl, 3                   ;number of notes
+        mov cl, disconnectedSoundNote
 
     JMP Sound_Playing 
     ;==========================        
@@ -46,7 +49,7 @@ SoundInputProcessing MACRO Choice
         cmp Choice, F4_ScanCode  
         jne Sound_ESC
         
-        call SoundSetting
+        call SoundSetting               ;Soundstg.asm
         call SoundPlayerScreen          ;refresh sound player screen
         
     JMP Return 

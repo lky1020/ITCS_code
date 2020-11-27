@@ -327,8 +327,6 @@ WaitOtherUser PROC
     	INC BX
     	CMP BX, MaxUserNameSize
     	JLE Send_UserName
-    
-    	ClearKeyBuffer                  ;clear the key buffer
 
 	RET
 WaitOtherUser ENDP

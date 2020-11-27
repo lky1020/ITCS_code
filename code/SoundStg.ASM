@@ -16,7 +16,6 @@ SoundSettingInputProcessing MACRO Choice
         mov al, 1
         mov CurrentSoundSet, al
         
-        
     JMP Refresh
     ;==========================
 

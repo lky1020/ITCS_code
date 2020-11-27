@@ -25,7 +25,7 @@ ENDM SpeakerOff
 
 ;Set the pitch to be play
 SetPitch MACRO
-    ;Specify that timer channel 2 is to be useD
+    ;Specify that timer channel 2 is to be used
         ;10 = set time channel 2
         ;11 = read low byte(LSB) the high byte(MSB)
         ;011 = Output a square wave (0 and 1)
@@ -50,16 +50,17 @@ SoundPlay MACRO
 
     soundLoop:
         
+        ;mov sound array(DW) to bx
         mov bx,[si]
         
-        ;store cx with dx
+        ;store cx(sound note) with dx
         mov dx,cx
         
         ;delay
         mov cx,delay1
         
             wait1:
-                push cx         ;store delay1 into stack,need put delay2 into cx
+                push cx         ;store delay1 into stack, to put delay2 into cx
                 mov cx,delay2
                 
             wait2:

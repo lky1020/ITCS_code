@@ -34,21 +34,6 @@ GetKeyPressAndFlush MACRO
 	
 ENDM GetKeyPressAndFlush
 
-;Clear Keyboard buffer
-ClearKeyBuffer MACRO
-	LOCAL Back, Return
-	
-	Back:
-    	GetKeyPress
-    	JZ Return
-    	
-    	TransferKeyPress
-    	JMP Back
-    	
-	Return:
-	
-ENDM ClearKeyBuffer
-
 ;Display Character
 DisplayChar MACRO InChar
     
@@ -58,20 +43,13 @@ DisplayChar MACRO InChar
 	
 ENDM DisplayChar
 
-;Read Character
-ReadChar MACRO InChar 
-    
-	MOV AH,07H
-	INT 21H
-	MOV InChar,AL
-	
-ENDM ReadChar
-
 ;Display String
 DisplayStr MACRO InStr
     
+    LEA SI,InStr 
+    
 	MOV AH,09H
-	MOV DX, OFFSET InStr
+	MOV DX, SI
 	INT 21H
 	
 ENDM DisplayStr
@@ -79,8 +57,10 @@ ENDM DisplayStr
 ;Read String
 ReadStr MACRO InStr
     
+    LEA SI,InStr 
+    
 	MOV AH,0AH
-	MOV DX,OFFSET InStr
+	MOV DX, SI
 	INT 21H
 	
 ENDM ReadStr
