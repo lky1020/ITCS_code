@@ -1,5 +1,8 @@
 Note: Please lower your speaker volume
 
+Application to create Virtual Serial Port
+VSPE Download Link: http://www.eterlogic.com/Downloads.html 
+
 Connection: serial1 = directserial realport:com1
 	    serial1 = directserial realport:com2
 
