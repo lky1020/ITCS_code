@@ -805,11 +805,11 @@ BalloonMenu proc
 
 		MOV 	SaveChar, al
 		
-		;DI will be the clock ticks
+		;DI will be the speed of displaying the shoot
 		MOV 	DI, 1
 		MOV 	AH, 0
 
-		;to get the system time
+		;To get the system time
 		INT 	1AH
 		MOV 	BX, DX
 		
@@ -825,8 +825,8 @@ BalloonMenu proc
 
 	Delay:
 		MOV 	AH, 0
-		INT 	1Ah
-		SUB 	DX, BX
+		INT 	1Ah			;Get system time
+		SUB 	DX, BX		;Value of BX assign in line 814 System time when call
 		CMP 	DI, DX
 		JA 		Delay
 	
