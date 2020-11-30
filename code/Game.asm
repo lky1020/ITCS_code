@@ -805,7 +805,7 @@ BalloonMenu proc
 
 		MOV 	SaveChar, al
 		
-		;DI will be the speed of displaying the shoot
+		;DI will be the speed or second of displaying the shoot
 		MOV 	DI, 1
 		MOV 	AH, 0
 
