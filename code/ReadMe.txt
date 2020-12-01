@@ -1,4 +1,4 @@
-Note: Please lower your speaker volume
+Note: Please lower your speaker volume to avoid harsh sound
 
 Application to create Virtual Serial Port
 VSPE Download Link: http://www.eterlogic.com/Downloads.html 
@@ -6,7 +6,19 @@ VSPE Download Link: http://www.eterlogic.com/Downloads.html
 Connection: serial1 = directserial realport:com1
 	    serial1 = directserial realport:com2
 
-Run program
+MASM .asm
+1. masm code\main.asm
+2. masm code\chat.asm
+3. masm code\game.asm
+4. masm code\sound.asm
+5. masm code\soundstg
+
+Link the obj
+1. mount c: c:\itcs_code
+2. c:
+3. link main + chat + game + sound + soundstg
+
+Run the program
 1. mount c: c:\itcs_code
 2. c:
 3. main.exe
